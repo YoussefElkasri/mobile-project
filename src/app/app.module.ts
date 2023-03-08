@@ -9,6 +9,7 @@ import { provideAuth, getAuth} from '@angular/fire/auth';
 import { environment } from 'src/environments/environment';
 import { AppComponent } from './app.component';
 import { routes } from './routes';
+import { AuthGuard } from './services/auth.service';
 
 @NgModule({
   declarations: [AppComponent],
@@ -24,7 +25,7 @@ import { routes } from './routes';
     IonicModule.forRoot(),
     RouterModule.forRoot(routes, { preloadingStrategy: PreloadAllModules })
   ],
-  providers: [{ provide: RouteReuseStrategy, useClass: IonicRouteStrategy }],
+  providers: [{ provide: RouteReuseStrategy, useClass: IonicRouteStrategy },AuthGuard],
   bootstrap: [AppComponent],
 })
 

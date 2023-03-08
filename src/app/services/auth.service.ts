@@ -1,12 +1,12 @@
 import { inject, Injectable } from '@angular/core';
 import { Firestore , doc, getDoc } from '@angular/fire/firestore';
 // import { AngularFireAuth } from '@angular/fire/compat/auth';
-import { Auth , createUserWithEmailAndPassword, signInWithEmailAndPassword, getAuth, authState } from "@angular/fire/auth";
+import { Auth , createUserWithEmailAndPassword, signInWithEmailAndPassword, getAuth, authState, onAuthStateChanged } from "@angular/fire/auth";
 import { BehaviorSubject, Observable } from 'rxjs';
 // import * as auth from 'firebase/auth';
 
 import { User } from '../models/user';
-import { Router } from '@angular/router';
+import { ActivatedRouteSnapshot, CanActivate, Router, RouterStateSnapshot } from '@angular/router';
 import "firebase/auth";
 import { FirebaseApp } from '@angular/fire/app';
 
@@ -16,9 +16,10 @@ import { FirebaseApp } from '@angular/fire/app';
 })
 export class AuthService {
 
+
   private firestore= inject(Firestore);
   private user$:BehaviorSubject<User> = new BehaviorSubject({} as User);
-
+  user!:User;
   constructor(public auth: Auth,public router: Router,) { }
 
 
@@ -75,6 +76,7 @@ export class AuthService {
       photoURL: user.photoURL,
       emailVerified: user.emailVerified,
     };
+    this.user=userData;
     this.user$.next(userData);
     console.log(userData);
   }
@@ -87,6 +89,33 @@ export class AuthService {
     });
   }
 
+  getAuthStatus():boolean {
+    const user = this.auth.currentUser;
+    console.log(user);
+    if(user){
+      return true;
+    }else{
+      return false;
+    }
+
+  }
 
 
+}
+
+
+@Injectable()
+export class AuthGuard implements CanActivate {
+    constructor(
+        private authService: AuthService,
+        private router: Router) { }
+    canActivate(
+        route: ActivatedRouteSnapshot,
+        state: RouterStateSnapshot): boolean | Promise<boolean> {
+        var isAuthenticated = this.authService.getAuthStatus();
+        if (!isAuthenticated) {
+            this.router.navigate(['/login']);
+        }
+        return isAuthenticated;
+    }
 }
