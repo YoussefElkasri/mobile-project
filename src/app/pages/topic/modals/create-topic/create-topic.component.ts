@@ -40,7 +40,7 @@ import { Topic } from 'src/app/models/topic';
       </span>
     </ion-text>
   </ion-content>
-</form>
+  </form>
   `,
   styles: [],
 })

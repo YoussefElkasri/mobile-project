@@ -10,6 +10,10 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/topic-details/topic-details.page').then( m => m.TopicDetailsPage)
   },
   {
+    path: 'login',
+    loadComponent: () => import('./pages/auth/auth.component').then( m => m.AuthComponent)
+  },
+  {
     path: '',
     redirectTo: 'topic',
     pathMatch: 'full'

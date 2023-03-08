@@ -19,6 +19,7 @@ import { routes } from './routes';
     provideFirestore(() => getFirestore()),
     provideAuth(() => getAuth()),
     CommonModule,
+
     BrowserModule,
     IonicModule.forRoot(),
     RouterModule.forRoot(routes, { preloadingStrategy: PreloadAllModules })
@@ -26,4 +27,5 @@ import { routes } from './routes';
   providers: [{ provide: RouteReuseStrategy, useClass: IonicRouteStrategy }],
   bootstrap: [AppComponent],
 })
+
 export class AppModule {}

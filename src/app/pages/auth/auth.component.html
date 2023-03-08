@@ -1,0 +1,54 @@
+<form [formGroup]="authForm" (ngSubmit)="login()" novalidate>
+    <ion-header translucent>
+        <ion-toolbar>
+            <!-- <ion-buttons slot="start">
+        <ion-button fill="clear" color="primary" (click)="dismissModal(null, 'canceled')">Close</ion-button>
+      </ion-buttons> -->
+            <ion-title>Authentication</ion-title>
+            <ion-buttons slot="end">
+                <ion-button fill="clear" color="primary" [disabled]="authForm.invalid" type="submit">
+                    <ion-icon name="checkmark-outline"></ion-icon>
+                </ion-button>
+            </ion-buttons>
+        </ion-toolbar>
+    </ion-header>
+    <ion-content fullscreen>
+
+        <ion-item lines="full">
+            <ion-label position="floating">Identifiant</ion-label>
+            <ion-input type="text" name="email" formControlName="email" required></ion-input>
+        </ion-item>
+        <ion-text color="danger" *ngIf="controls['email'].touched && controls['email'].errors?.['required']">
+            <span>
+        This field is required
+      </span>
+        </ion-text>
+        <ion-text color="danger" *ngIf="controls['email'].touched && controls['email'].errors?.['minlength']">
+            <span>
+        Minimum length 2
+            </span>
+        </ion-text>
+
+
+        <ion-item lines="full">
+            <ion-label position="floating">Password</ion-label>
+            <ion-input type="text" name="password" formControlName="password" required></ion-input>
+        </ion-item>
+        <ion-text color="danger" *ngIf="controls['password'].touched && controls['password'].errors?.['required']">
+            <span>
+      This field is required
+    </span>
+        </ion-text>
+        <ion-text color="danger" *ngIf="controls['password'].touched && controls['password'].errors?.['minlength']">
+            <span>
+      Minimum length 2
+          </span>
+        </ion-text>
+
+        <ion-text color="danger" *ngIf="identifiantPassError">
+            <span>
+      Identifiant or password not correct
+      </span></ion-text>
+
+    </ion-content>
+</form>
