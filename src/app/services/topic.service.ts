@@ -34,6 +34,12 @@ export class TopicService {
     return collectionData<Post>(collectionRef, {idField:'id'});
   }
 
+  findOnePost(topicId: string, postId: string): Observable<any>{
+    const docRef = doc(this.firestore,`topics/${topicId}/posts/${postId}`);
+
+    return docData(docRef, {idField:'id'});
+  }
+
   /**
    * Method that returns the topic which match the given id
    *

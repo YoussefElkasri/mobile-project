@@ -10,6 +10,10 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/topic-details/topic-details.page').then( m => m.TopicDetailsPage)
   },
   {
+    path: 'topic/:topicId/post/:postId',
+    loadComponent: () => import('./pages/post-details/post-details.page').then( m => m.PostDetailsPage)
+  },
+  {
     path: '',
     redirectTo: 'topic',
     pathMatch: 'full'

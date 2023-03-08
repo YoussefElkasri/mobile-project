@@ -37,7 +37,7 @@ import { CreatePostComponent } from './modals/create-post/create-post.component'
     <ion-list>
       <!-- Sliding item with text options on both sides -->
       <ion-item-sliding *ngFor="let post of topic$?.posts">
-        <ion-item [routerLink]="['/post-details/' + post.id ]" routerLinkActive="active" lines="none">
+        <ion-item [routerLink]="['post/' + post.id ]" routerLinkActive="active" lines="none">
           <ion-label>{{ post.name }}</ion-label>
         </ion-item>
 
