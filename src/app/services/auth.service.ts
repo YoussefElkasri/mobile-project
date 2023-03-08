@@ -1,14 +1,12 @@
 import { inject, Injectable } from '@angular/core';
-import { Firestore , doc, getDoc } from '@angular/fire/firestore';
+import { Firestore , doc, getDoc, addDoc, collection } from '@angular/fire/firestore';
 // import { AngularFireAuth } from '@angular/fire/compat/auth';
-import { Auth , createUserWithEmailAndPassword, signInWithEmailAndPassword, getAuth, authState } from "@angular/fire/auth";
+import { Auth , createUserWithEmailAndPassword, signInWithEmailAndPassword, getAuth, authState, UserCredential } from "@angular/fire/auth";
 import { BehaviorSubject, Observable } from 'rxjs';
 // import * as auth from 'firebase/auth';
 
 import { User } from '../models/user';
 import { Router } from '@angular/router';
-import "firebase/auth";
-import { FirebaseApp } from '@angular/fire/app';
 
 
 @Injectable({
@@ -74,19 +72,27 @@ export class AuthService {
       displayName: user.displayName,
       photoURL: user.photoURL,
       emailVerified: user.emailVerified,
+      username: '',
+      password: ''
     };
     this.user$.next(userData);
     console.log(userData);
   }
 
-   // Sign out
-   SignOut() {
+  // Sign out
+  SignOut() {
     return this.auth.signOut().then(() => {
       localStorage.removeItem('user');
       this.router.navigate(['sign-in']);
     });
   }
 
+  createUserAuth(user: User): Promise<UserCredential> {
+    console.log(`password : ${user.password}`);
+    return createUserWithEmailAndPassword(this.auth, user.email, user.password);
+  }
 
-
+  addUser(user: User): void {
+    const docRef = addDoc(collection(this.firestore, "users"), {username : user.username, email: user.email });
+  }
 }
