@@ -88,10 +88,6 @@ export class TopicPage implements OnInit {
    * Fetch all the topic during the ngOnInit hook
    */
   ngOnInit(): void {
-    // this.topics$=this.topicService.
-    // this._fetchAllTopics();
-    this.topicService.getAll().subscribe(res=>console.log('getAll',res));
-
     this.topics$ = this.topicService.getAll().pipe(
       switchMap(topics=>this.text$.pipe(
         map(text=>topics.filter((t:Topic)=>t.name.toLocaleUpperCase().includes(text.toLocaleUpperCase())))
@@ -100,7 +96,6 @@ export class TopicPage implements OnInit {
   }
 
   test(event:any){
-    console.log(event.value);
     this.text$.next(event.value.toString())
   }
 
@@ -111,7 +106,6 @@ export class TopicPage implements OnInit {
    */
   delete(topic: Topic): void {
     this.topicService.delete(topic);
-    // this._fetchAllTopics();
   }
 
   /**
@@ -131,13 +125,8 @@ export class TopicPage implements OnInit {
 
     if (role === 'confirmed') {
       this._createTopic(data);
-      // this._fetchAllTopics();
     }
   }
-
-  /**
-   * @private method to fetch all the {Topic}
-   */
 
 
   /**

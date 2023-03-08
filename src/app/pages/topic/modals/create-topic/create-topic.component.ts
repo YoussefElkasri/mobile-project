@@ -94,8 +94,6 @@ export class CreateTopicComponent implements OnInit {
     if (this.createTopicForm.valid) {
       const topic: Topic = {
         ...this.createTopicForm.value,
-        //id: Date.now().toString() + (Math.random() * 100).toFixed(),
-        //posts: []
       };
       this.dismissModal(topic, 'confirmed');
     }
