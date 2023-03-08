@@ -23,7 +23,7 @@ import { Post } from 'src/app/models/post';
       </ion-buttons>
     </ion-toolbar>
   </ion-header>
-  
+
   <ion-content fullscreen>
     <ion-item lines="full">
       <ion-label position="floating">Name</ion-label>
@@ -99,7 +99,6 @@ export class CreatePostComponent implements OnInit {
     if (this.createPostForm.valid) {
       const post: Post = {
         ...this.createPostForm.value,
-        id: Date.now().toString() + (Math.random() * 100).toFixed()
       };
       this.dismissModal(post, 'confirmed');
     }

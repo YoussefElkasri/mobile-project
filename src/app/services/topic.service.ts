@@ -26,12 +26,18 @@ export class TopicService {
 
   getAll():Observable<Topic[]>{
     const collectionRef = collection(this.firestore,`topics`) as CollectionReference<Topic>;
-    return collectionData<Topic>(collectionRef,{idField:'id'})
+    return collectionData<Topic>(collectionRef, {idField:'id'});
   }
 
   getAllPosts(id:string):Observable<Post[]>{
     const collectionRef = collection(this.firestore,`topics/${id}/posts`) as CollectionReference<Post>;
-    return collectionData<Post>(collectionRef,{idField:'id'})
+    return collectionData<Post>(collectionRef, {idField:'id'});
+  }
+
+  findOnePost(topicId: string, postId: string): Observable<any>{
+    const docRef = doc(this.firestore,`topics/${topicId}/posts/${postId}`);
+
+    return docData(docRef, {idField:'id'});
   }
 
   /**
@@ -41,26 +47,17 @@ export class TopicService {
    * @return A {Topic}
    */
   findOne(id: string): Observable<any> {
-    // const collectionRef = docData(this.firestore,`topics`);
-
     const docRef = doc(this.firestore, "topics", id);
     const collectionRef = collection(this.firestore,`topics/${id}/posts`) as CollectionReference<Post>;
 
     return docData(docRef,{idField:'id'}).pipe(
-      switchMap(topic=> collectionData(collectionRef, {idField:id}).pipe(
+      switchMap(topic=> collectionData(collectionRef, {idField:'id'}).pipe(
         map(posts=>({
           ...topic,
           posts
         }))
       ))
     );
-
-    // return this.findAll().pipe(
-    //   map((topics: Topic[]) => topics.find(t => t.id ===id) || null)
-    // );
-
-    // const topic = this.topics.find(t => t.id === id);
-    // return topic ?? null;
   }
 
   /**
@@ -69,12 +66,7 @@ export class TopicService {
    * @param topic {Topic}, the {Topic} to add to the list
    */
   create(topic: Topic): void {
-    // this.topics =
     const docRef = addDoc(collection(this.firestore, "topics"), topic);
-
-  //  console.log("Document written with ID: ", docRef.id);
-
-   // this.topics$.next(this.topics$.value.concat(topic));
   }
 
   /**
@@ -83,10 +75,7 @@ export class TopicService {
    * @param topic {Topic}, the {Topic} to remove from the list
    */
   delete(topic: Topic): void {
-
     deleteDoc(doc(this.firestore, "topics", topic.id));
-    // this.topics$.next(this.topics$.value.filter(t => t.id !== topic.id));
-    // this.topics = this.topics.filter(t => t.id !== topic.id);
   }
 
   /**
@@ -96,21 +85,10 @@ export class TopicService {
    * @param post {Post}, the new {Post} to add
    */
   createPost(topicId: string, post: Post) {
-    // this.topics$.next(this.topics$.findIndex(t$ => t$.id === topicId);)
-    const topicIndex = this.topics$.value.findIndex(t$ => t$.id === topicId);
+    const collectionRef = collection(this.firestore,`topics/${topicId}/posts`) as CollectionReference<Post>;
 
-
-    console.log(topicIndex);
-    setDoc(doc(this.firestore, "topics", topicId), post);
-    if(topicIndex > -1) {
-
-      // this.topics$.next(this.topics$.value[topicIndex]?.posts.concat(post))
-      // this.topics[topicIndex].posts = this.topics[topicIndex]?.posts.concat(post);
-
-      // this.topics$.value[topicIndex].posts = this.topics$.value[topicIndex]?.posts.concat(post);
-
-      // this.topics$.next(this.topics$.value);
-
+    if(collectionRef != null) {
+      const docRef = addDoc(collectionRef, post);
     }
   }
 
@@ -121,9 +99,10 @@ export class TopicService {
    * @param post {Post}, the {Post} to remove
    */
   deletePost(topicId: string, post: Post): void {
-    // const topicIndex = this.topics.findIndex(t => t.id === topicId);
-    // if(topicIndex > -1) {
-    //   this.topics[topicIndex].posts = this.topics[topicIndex]?.posts.filter(p => p.id !== post.id);
-    // }
+    const docRef = doc(this.firestore, `topics/${topicId}/posts`, post.id)
+    if(docRef != null) {
+      deleteDoc(docRef);
+    }
+
   }
 }
