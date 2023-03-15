@@ -1,0 +1,91 @@
+<form [formGroup]="registerForm" (ngSubmit)="register()" novalidate>
+  <ion-header translucent>
+    <ion-toolbar>
+      <ion-buttons slot="start">
+        <ion-button fill="clear" color="primary" (click)="goBack()">Close</ion-button>
+      </ion-buttons>
+      <ion-title>Register</ion-title>
+      <ion-buttons slot="end">
+        <ion-button fill="clear" color="primary" [disabled]="registerForm.invalid && passwordMatchError" type="submit">
+          <ion-icon name="checkmark-outline"></ion-icon>
+        </ion-button>
+      </ion-buttons>
+    </ion-toolbar>
+  </ion-header>
+
+  <ion-content fullscreen>
+    <ion-item lines="full">
+      <ion-label position="floating">Username</ion-label>
+      <ion-input type="text" name="username" formControlName="username"></ion-input>
+    </ion-item>
+    <ion-text color="danger" *ngIf="controls['username'].touched && controls['username'].errors?.['required']">
+      <span>
+        This field is required
+      </span>
+    </ion-text>
+    <ion-text color="danger" *ngIf="controls['username'].touched && controls['username'].errors?.['minlength']">
+      <span>
+        Minimum length 2
+      </span>
+    </ion-text>
+
+    <ion-item lines="full">
+      <ion-label position="floating">Email</ion-label>
+      <ion-textarea type="email" ngModel [email]="true" name="email" formControlName="email"></ion-textarea>
+    </ion-item>
+
+    <ion-text color="danger" *ngIf="controls['email'].touched && controls['email'].errors?.['required']">
+      <span>
+        This field is required
+      </span>
+    </ion-text>
+    <ion-text color="danger" *ngIf="controls['email'].touched && controls['email'].errors?.['minlength']">
+      <span>
+        Minimum length 5
+      </span>
+    </ion-text>
+
+    <ion-item lines="full">
+      <ion-label position="floating">Password</ion-label>
+      <ion-textarea type="text" name="password" formControlName="password"></ion-textarea>
+    </ion-item>
+
+    <ion-text color="danger" *ngIf="controls['password'].touched && controls['password'].errors?.['required']">
+      <span>
+        This field is required
+      </span>
+    </ion-text>
+    <ion-text color="danger" *ngIf="controls['password'].touched && controls['password'].errors?.['minlength']">
+      <span>
+        Minimum length 6
+      </span>
+    </ion-text>
+
+    <ion-item lines="full">
+      <ion-label position="floating">Confirm password</ion-label>
+      <ion-textarea type="text" name="confirmPassword" formControlName="confirmPassword"></ion-textarea>
+    </ion-item>
+
+    <ion-text color="danger" *ngIf="controls['confirmPassword'].touched && controls['confirmPassword'].errors?.['required']">
+      <span>
+        This field is required
+      </span>
+    </ion-text>
+    <ion-text color="danger" *ngIf="controls['confirmPassword'].touched && controls['confirmPassword'].errors?.['minlength']">
+      <span>
+        Minimum length 6
+      </span>
+    </ion-text>
+
+    <ion-text color="danger"  *ngIf="passwordMatchError">
+      Password does not match
+    </ion-text>
+
+
+    <ion-text color="danger"  *ngIf="registerPassError">
+      Sorry, an error occure, please try later !
+    </ion-text>
+
+
+  </ion-content>
+</form>

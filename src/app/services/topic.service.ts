@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
-import { Firestore, collection, collectionData, doc, getDoc, docData, addDoc , deleteDoc, CollectionReference, setDoc , query, where} from '@angular/fire/firestore';
-import { BehaviorSubject, map, Observable, of,pipe, switchMap } from 'rxjs';
+import { Firestore, collection, collectionData, doc, docData, addDoc , deleteDoc, CollectionReference, query, where} from '@angular/fire/firestore';
+import { BehaviorSubject, map, Observable, switchMap } from 'rxjs';
 import { Post } from '../models/post';
 import { Topic } from '../models/topic';
 import { User } from '../models/user';

@@ -23,6 +23,10 @@ export const routes: Routes = [
     // canActivate: [AuthGuard],
   },
   {
+    path: 'register',
+    loadComponent: () => import('./pages/register/register.component').then( m => m.RegisterComponent)
+  },
+  {
     path: '',
     redirectTo: 'topic',
     pathMatch: 'full'
