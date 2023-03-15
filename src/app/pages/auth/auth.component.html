@@ -1,9 +1,6 @@
 <form [formGroup]="authForm" (ngSubmit)="login()" novalidate>
-    <ion-header translucent>
+    <!-- <ion-header translucent>
         <ion-toolbar>
-            <!-- <ion-buttons slot="start">
-        <ion-button fill="clear" color="primary" (click)="dismissModal(null, 'canceled')">Close</ion-button>
-      </ion-buttons> -->
             <ion-title>Authentication</ion-title>
             <ion-buttons slot="end">
                 <ion-button fill="clear" color="primary" [disabled]="authForm.invalid" type="submit">
@@ -11,44 +8,76 @@
                 </ion-button>
             </ion-buttons>
         </ion-toolbar>
-    </ion-header>
-    <ion-content fullscreen>
+    </ion-header> -->
 
-        <ion-item lines="full">
-            <ion-label position="floating">Identifiant</ion-label>
-            <ion-input type="text" name="email" formControlName="email" required></ion-input>
+
+    <ion-content fullscreen>
+        <div class="logo">
+            <!-- <ion-icon color="light" name="contact"></ion-icon> -->
+            <ion-icon name="person-circle-outline"></ion-icon>
+        </div>
+
+        <ion-text color="danger" *ngIf="identifiantPassError">
+            <span class="error-text">
+            Identifiant or password not correct
+          </span>
+        </ion-text>
+
+        <ion-item>
+            <ion-label color="light">Identifiant</ion-label>
+            <ion-input color="light" type="mail" placeholder="Adresse email" name="email" formControlName="email" required></ion-input>
         </ion-item>
         <ion-text color="danger" *ngIf="controls['email'].touched && controls['email'].errors?.['required']">
-            <span>
-        This field is required
-      </span>
+            <span class="error-text">
+            This field is required
+        </span>
         </ion-text>
+
         <ion-text color="danger" *ngIf="controls['email'].touched && controls['email'].errors?.['minlength']">
-            <span>
-        Minimum length 2
+            <span class="error-text">
+                Minimum length 2
+          </span>
+        </ion-text>
+
+        <ion-item>
+            <ion-label color="light">Password</ion-label>
+            <ion-input color="light" type="password" placeholder="Mot de passe" name="password" formControlName="password" required></ion-input>
+        </ion-item>
+
+        <ion-text color="danger" *ngIf="controls['password'].touched && controls['password'].errors?.['required']">
+            <span class="error-text">
+                This field is required
             </span>
         </ion-text>
-
-
-        <ion-item lines="full">
-            <ion-label position="floating">Password</ion-label>
-            <ion-input type="text" name="password" formControlName="password" required></ion-input>
-        </ion-item>
-        <ion-text color="danger" *ngIf="controls['password'].touched && controls['password'].errors?.['required']">
-            <span>
-      This field is required
-    </span>
-        </ion-text>
         <ion-text color="danger" *ngIf="controls['password'].touched && controls['password'].errors?.['minlength']">
-            <span>
+            <span class="error-text">
       Minimum length 2
           </span>
         </ion-text>
 
-        <ion-text color="danger" *ngIf="identifiantPassError">
-            <span>
-      Identifiant or password not correct
-      </span></ion-text>
+        <ion-item lines="none">
+            <ion-button color="light" slot="end" fill="clear">Mot de passe oublié ?</ion-button>
+        </ion-item>
 
+        <ion-button color="light" expand="block" shape="round" [disabled]="authForm.invalid" type="submit" fill="outline">Connexion</ion-button>
+        <br>
+        <ion-button color="tertiary" expand="block" shape="round">Inscription</ion-button>
+
+        <!-- <ion-item lines="none"> -->
+        <div class="center-elm">
+            <ion-label color="light" text-center>Ou connectez-vous avec</ion-label>
+        </div>
+
+        <!-- </ion-item> -->
+        <div class="flex">
+            <ion-button color="facebook" shape="round">
+                <ion-icon slot="start" name="logo-facebook"></ion-icon>
+                Facebook
+            </ion-button>
+            <ion-button color="google" shape="round">
+                <ion-icon slot="start" name="logo-google"></ion-icon>
+                Google
+            </ion-button>
+        </div>
     </ion-content>
 </form>

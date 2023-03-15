@@ -7,6 +7,7 @@ import { RouterModule } from '@angular/router';
 import { NgFor } from '@angular/common';
 import { BehaviorSubject, filter, map, Observable, switchMap } from 'rxjs';
 import { CommonModule } from '@angular/common';
+import { UsersModalComponent } from './modals/create-topic/users-modal/users-modal.component';
 
 @Component({
   selector: 'app-home',

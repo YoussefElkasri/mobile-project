@@ -75,6 +75,7 @@ export class AuthService {
       displayName: user.displayName,
       photoURL: user.photoURL,
       emailVerified: user.emailVerified,
+      username: user.username,
     };
     this.user=userData;
     this.user$.next(userData);
@@ -100,6 +101,10 @@ export class AuthService {
 
   }
 
+  getAuth() {
+    return this.auth.currentUser;
+
+  }
 
 }
 

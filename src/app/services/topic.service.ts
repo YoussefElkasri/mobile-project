@@ -1,8 +1,10 @@
 import { inject, Injectable } from '@angular/core';
-import { Firestore, collection, collectionData, doc, getDoc, docData, addDoc , deleteDoc, CollectionReference, setDoc } from '@angular/fire/firestore';
+import { Firestore, collection, collectionData, doc, getDoc, docData, addDoc , deleteDoc, CollectionReference, setDoc , query, where} from '@angular/fire/firestore';
 import { BehaviorSubject, map, Observable, of,pipe, switchMap } from 'rxjs';
 import { Post } from '../models/post';
 import { Topic } from '../models/topic';
+import { User } from '../models/user';
+import { AuthService } from './auth.service';
 
 @Injectable({
   providedIn: 'root'
@@ -10,8 +12,8 @@ import { Topic } from '../models/topic';
 export class TopicService {
 
   private firestore= inject(Firestore);
-
-  private topics$:BehaviorSubject<Topic[]> = new BehaviorSubject([{id: '123', name: 'test', posts: []} as Topic]);
+  private authService = inject(AuthService);
+  private topics$:BehaviorSubject<Topic[]> = new BehaviorSubject([{} as Topic]);
 
   constructor() { }
 
@@ -25,8 +27,17 @@ export class TopicService {
   }
 
   getAll():Observable<Topic[]>{
+   // Create a reference to the cities collection
+   //var topicsRef = this.firestore.collection("topics");
+
+    // Create a query against the collection.
+    //var q = query(topicsRef, where("creator", "==", "CA"));
+
     const collectionRef = collection(this.firestore,`topics`) as CollectionReference<Topic>;
-    return collectionData<Topic>(collectionRef, {idField:'id'});
+    let uid= this.authService.getAuth()?.uid;
+    console.log(uid);
+    return collectionData<Topic>(query(collectionRef, where("creator", "==", uid)));
+   // return collectionData<Topic>(collectionRef, {idField:'id'});
   }
 
   getAllPosts(id:string):Observable<Post[]>{
@@ -66,6 +77,7 @@ export class TopicService {
    * @param topic {Topic}, the {Topic} to add to the list
    */
   create(topic: Topic): void {
+    topic.creator = this.authService.getAuth()!.uid;
     const docRef = addDoc(collection(this.firestore, "topics"), topic);
   }
 
@@ -105,4 +117,10 @@ export class TopicService {
     }
 
   }
+
+  getAllUsers():Observable<User[]>{
+    const collectionRef = collection(this.firestore,`users`) as CollectionReference<User>;
+    return collectionData<User>(collectionRef, {idField:'id'});
+  }
+
 }

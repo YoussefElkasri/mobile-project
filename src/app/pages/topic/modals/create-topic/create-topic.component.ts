@@ -1,13 +1,18 @@
 import { NgIf } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit, ViewChild } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { IonicModule, ModalController } from '@ionic/angular';
+import { IonicModule, IonModal, ModalController, NavController } from '@ionic/angular';
+import { BehaviorSubject, map, Observable, switchMap } from 'rxjs';
+import { Item } from 'src/app/models/item';
 import { Topic } from 'src/app/models/topic';
+import { TopicService } from 'src/app/services/topic.service';
+import { UsersModalComponent } from './users-modal/users-modal.component';
+import { User } from 'src/app/models/user';
 
 @Component({
   selector: 'app-create-topic',
   standalone: true,
-  imports: [ReactiveFormsModule, IonicModule, NgIf],
+  imports: [ReactiveFormsModule, IonicModule, NgIf, UsersModalComponent],
   template: `
   <form [formGroup]="createTopicForm" (ngSubmit)="createTopic()" novalidate>
   <ion-header translucent>
@@ -17,7 +22,8 @@ import { Topic } from 'src/app/models/topic';
       </ion-buttons>
       <ion-title>Modal Content</ion-title>
       <ion-buttons slot="end">
-        <ion-button fill="clear" color="primary" [disabled]="createTopicForm.invalid" type="submit">
+        <ion-button fill="clear" color="primary"  type="submit">
+        <!-- [disabled]="createTopicForm.invalid" -->
           <ion-icon name="checkmark-outline"></ion-icon>
         </ion-button>
       </ion-buttons>
@@ -39,17 +45,39 @@ import { Topic } from 'src/app/models/topic';
         Minimum length 2
       </span>
     </ion-text>
+
+    <ion-list [inset]="true">
+    <ion-item [button]="true" [detail]="false" id="select-users">
+      <ion-label>Invitez votre collegues dans votre groupe !</ion-label>
+      <div slot="end" id="selected-fruits">{{ selectedFruitsText }}</div>
+    </ion-item>
+  </ion-list>
   </ion-content>
+
+  <ion-modal trigger="select-users" #modal>
+    <ng-template>
+      <app-users-modal
+        class="ion-page"
+        title="Favorite Fruits"
+        [items]="userItems"
+        [selectedItems]="selectedFruits"
+        (selectionChange)="fruitSelectionChanged($event)"
+        (selectionCancel)="modal.dismiss()"
+      ></app-users-modal>
+    </ng-template>
+  </ion-modal>
 </form>
   `,
   styles: [],
 })
 export class CreateTopicComponent implements OnInit {
+  @ViewChild('modal', { static: true }) modal!: IonModal;
 
   createTopicForm!: FormGroup;
-
+  users:User[]=[];
+  private topicService = inject(TopicService);
   constructor(private modalController: ModalController,
-    private formBuilder: FormBuilder) {
+    private formBuilder: FormBuilder,public navCtrl: NavController) {
 
   }
 
@@ -71,7 +99,16 @@ export class CreateTopicComponent implements OnInit {
   ngOnInit() {
     this.createTopicForm = this.formBuilder.group({
       name: ['', [Validators.required, Validators.minLength(2)]],
+      userList: [[], [Validators.required]],
     });
+    this.topicService.getAllUsers().subscribe(data=>{
+      this.users=data;
+      this.users.forEach(user=>{
+        this.userItems.push({text:user.username,value:user.email});
+      })
+      console.log(this.users);
+    });
+
   }
 
   /**
@@ -91,11 +128,40 @@ export class CreateTopicComponent implements OnInit {
    * with the status 'confirmed' and the given {Topic}
    */
   createTopic() {
+    this.createTopicForm.get("userList")?.setValue([{username:"youssef",email:"elkasri.youssef@outlook.fr"}]);
+
+    console.log(this.createTopicForm.value);
     if (this.createTopicForm.valid) {
       const topic: Topic = {
         ...this.createTopicForm.value,
       };
       this.dismissModal(topic, 'confirmed');
     }
+  }
+
+
+  selectedFruitsText = 'Aucun utilisateur invité';
+  selectedFruits: string[] = [];
+
+
+  userItems: Item[] = [];
+
+  private formatData(data: string[]) {
+    if (data.length === 1) {
+      const userItem = this.userItems.find(userItem => userItem.value === data[0])
+      return userItem!.text;
+    }
+
+    return `${data.length} items`;
+  }
+
+  fruitSelectionChanged(userItems: string[]) {
+    this.selectedFruits = userItems;
+    this.selectedFruitsText = this.formatData(this.selectedFruits);
+    // console.log("test",this.selectedFruitsText);
+    // console.log(this.modal.getCurrentBreakpoint());
+    // this.navCtrl.pop();
+    this.modal.dismiss();
+    console.log(this.modal.getCurrentBreakpoint());
   }
 }
