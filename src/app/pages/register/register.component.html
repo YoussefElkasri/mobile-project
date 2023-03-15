@@ -31,7 +31,7 @@
 
     <ion-item lines="full">
       <ion-label position="floating">Email</ion-label>
-      <ion-textarea type="text" name="email" formControlName="email"></ion-textarea>
+      <ion-textarea type="email" ngModel [email]="true" name="email" formControlName="email"></ion-textarea>
     </ion-item>
 
     <ion-text color="danger" *ngIf="controls['email'].touched && controls['email'].errors?.['required']">
@@ -41,7 +41,7 @@
     </ion-text>
     <ion-text color="danger" *ngIf="controls['email'].touched && controls['email'].errors?.['minlength']">
       <span>
-        Minimum length 2
+        Minimum length 5
       </span>
     </ion-text>
 
@@ -57,7 +57,7 @@
     </ion-text>
     <ion-text color="danger" *ngIf="controls['password'].touched && controls['password'].errors?.['minlength']">
       <span>
-        Minimum length 2
+        Minimum length 6
       </span>
     </ion-text>
 
@@ -73,7 +73,7 @@
     </ion-text>
     <ion-text color="danger" *ngIf="controls['confirmPassword'].touched && controls['confirmPassword'].errors?.['minlength']">
       <span>
-        Minimum length 2
+        Minimum length 6
       </span>
     </ion-text>
 

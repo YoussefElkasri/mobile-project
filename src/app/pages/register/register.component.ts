@@ -22,9 +22,9 @@ export class RegisterComponent implements OnInit {
 
     this.registerForm = this.formBuilder.group({
       username: ['', [Validators.required, Validators.minLength(2)]],
-      email: ['', [Validators.required, Validators.minLength(2)]],
-      password: ['', [Validators.required, Validators.minLength(4)]],
-      confirmPassword:  ['', [Validators.required, Validators.minLength(4)] ]
+      email: ['', [Validators.required, Validators.minLength(5)]],
+      password: ['', [Validators.required, Validators.minLength(6)]],
+      confirmPassword:  ['', [Validators.required, Validators.minLength(6)] ]
     },
     {
       validator: this.MatchValidator('password', 'confirmPassword'),
