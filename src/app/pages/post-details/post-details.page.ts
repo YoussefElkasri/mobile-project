@@ -26,7 +26,7 @@ import { TopicService } from 'src/app/services/topic.service';
           <ion-icon name="arrow-back-outline"></ion-icon>
         </ion-button>
       </ion-buttons>
-      <ion-title>{{post$.name}}</ion-title>
+      <!-- <ion-title>{{post$.name}}</ion-title> -->
     </ion-toolbar>
   </ion-header>
 
@@ -34,7 +34,7 @@ import { TopicService } from 'src/app/services/topic.service';
     <ion-label>
       <h1>Description</h1>
     </ion-label>
-    <ion-label>{{ post$.description }}</ion-label>
+    <!-- <ion-label>{{ post$.description }}</ion-label> -->
   </ion-content>
 </ng-container>
 

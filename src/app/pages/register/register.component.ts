@@ -22,7 +22,7 @@ export class RegisterComponent implements OnInit {
 
     this.registerForm = this.formBuilder.group({
       username: ['', [Validators.required, Validators.minLength(2)]],
-      email: ['', [Validators.required, Validators.minLength(5)]],
+      email: ['', [Validators.required, Validators.pattern("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,4}$")]],
       password: ['', [Validators.required, Validators.minLength(6)]],
       confirmPassword:  ['', [Validators.required, Validators.minLength(6)] ]
     },
@@ -47,6 +47,10 @@ export class RegisterComponent implements OnInit {
 
   register(){
 
+    if(this.passwordMatchError) {
+      return;
+    }
+
     const values = this.registerForm.value;
 
     const user: User = {
@@ -54,14 +58,14 @@ export class RegisterComponent implements OnInit {
       username: values.username,
       email: values.email,
       password: values.password,
-      displayName: '',
-      photoURL: '',
-      emailVerified: false
+      photoURL: ''
     }
 
     this.authService.createUserAuth(user)
-    .then( () =>{
-      this.authService.addUser(user)
+    .then( (autUser) =>{
+      user.uid = autUser.user.uid;
+      this.authService.addUser(user);
+      this.router.navigate(['login']);
     }
     )
     .catch(error => {

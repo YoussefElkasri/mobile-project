@@ -1,5 +1,5 @@
 <form [formGroup]="registerForm" (ngSubmit)="register()" novalidate>
-  <ion-header translucent>
+  <!-- <ion-header translucent>
     <ion-toolbar>
       <ion-buttons slot="start">
         <ion-button fill="clear" color="primary" (click)="goBack()">Close</ion-button>
@@ -11,9 +11,13 @@
         </ion-button>
       </ion-buttons>
     </ion-toolbar>
-  </ion-header>
+  </ion-header> -->
 
   <ion-content fullscreen>
+    <div class="logo">
+      <!-- <ion-icon color="light" name="contact"></ion-icon> -->
+      <ion-icon name="person-circle-outline"></ion-icon>
+  </div>
     <ion-item lines="full">
       <ion-label position="floating">Username</ion-label>
       <ion-input type="text" name="username" formControlName="username"></ion-input>
@@ -31,7 +35,7 @@
 
     <ion-item lines="full">
       <ion-label position="floating">Email</ion-label>
-      <ion-textarea type="email" ngModel [email]="true" name="email" formControlName="email"></ion-textarea>
+      <ion-input type="text" name="email" formControlName="email"></ion-input>
     </ion-item>
 
     <ion-text color="danger" *ngIf="controls['email'].touched && controls['email'].errors?.['required']">
@@ -47,7 +51,7 @@
 
     <ion-item lines="full">
       <ion-label position="floating">Password</ion-label>
-      <ion-textarea type="text" name="password" formControlName="password"></ion-textarea>
+      <ion-input type="password" name="password" formControlName="password"></ion-input>
     </ion-item>
 
     <ion-text color="danger" *ngIf="controls['password'].touched && controls['password'].errors?.['required']">
@@ -63,7 +67,7 @@
 
     <ion-item lines="full">
       <ion-label position="floating">Confirm password</ion-label>
-      <ion-textarea type="text" name="confirmPassword" formControlName="confirmPassword"></ion-textarea>
+      <ion-input type="password" name="confirmPassword" formControlName="confirmPassword"></ion-input>
     </ion-item>
 
     <ion-text color="danger" *ngIf="controls['confirmPassword'].touched && controls['confirmPassword'].errors?.['required']">
@@ -85,6 +89,13 @@
     <ion-text color="danger"  *ngIf="registerPassError">
       Sorry, an error occure, please try later !
     </ion-text>
+
+
+    <ion-button color="light" expand="block" shape="round" [disabled]="registerForm.invalid" type="submit" fill="outline">Register</ion-button>
+
+    <br>
+
+    <ion-button color="tertiary" expand="block" shape="round" (click)="goBack()">Cancel</ion-button>
 
 
   </ion-content>

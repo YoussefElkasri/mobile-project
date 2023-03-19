@@ -1,9 +1,11 @@
+import { User } from 'src/app/models/user';
+import { AuthService } from 'src/app/services/auth.service';
 import { CommonModule, NgFor } from '@angular/common';
 import { Component, inject, OnInit } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { IonicModule, ModalController, ToastController } from '@ionic/angular';
-import { EMPTY, Observable } from 'rxjs';
+import { EMPTY, Observable, map } from 'rxjs';
 import { Post } from 'src/app/models/post';
 import { Topic } from 'src/app/models/topic';
 import { TopicService } from 'src/app/services/topic.service';
@@ -35,30 +37,50 @@ import { CreatePostComponent } from './modals/create-post/create-post.component'
 
   <ion-content>
     <ion-list>
-      <!-- Sliding item with text options on both sides -->
-      <ion-item-sliding *ngFor="let post of topic$?.posts">
-        <ion-item [routerLink]="['post/' + post.id ]" routerLinkActive="active" lines="none">
-          <ion-label>{{ post.name }}</ion-label>
-        </ion-item>
+      <ion-item *ngFor="let post of topic$?.posts" class="message">
+        <ion-avatar slot="start">
+          <img alt="Silhouette of a person's head" src="https://ionicframework.com/docs/img/demos/avatar.svg" />
+        </ion-avatar>
+        <div class="messageInfo">
+          <ion-label class="messageHeader" shape="round" slot="start">{{ post.username }} {{ this.timestampToDate(post.dateTime) }}</ion-label>
 
-        <ion-item-options side="end">
-          <ion-item-option (click)="delete(topic$!, post)" color="danger">
-            <ion-icon slot="icon-only" name="trash"></ion-icon>
-          </ion-item-option>
-        </ion-item-options>
-      </ion-item-sliding>
+          <ion-label>{{ post.message }}</ion-label>
+        </div>
+
+      </ion-item>
     </ion-list>
-    <ion-fab horizontal="end" vertical="bottom" slot="fixed">
-      <ion-fab-button (click)="openCreatePostModal()">
-        <ion-icon name="add"></ion-icon>
-      </ion-fab-button>
-    </ion-fab>
   </ion-content>
+
+  <ion-item vertical="bottom">
+      <ion-input [(ngModel)]="message" placeholder="Say hello !"></ion-input>
+      <ion-fab-button size="small" (click)="sendMessage()">
+        <ion-icon name="send" size="small" ></ion-icon>
+      </ion-fab-button>
+    </ion-item>
+
 </ng-container>
 
 
 `,
-  styles: [],
+  styles: [`
+    .message {
+      /* .messageInfo {
+      text-align: right;
+      flex-direction: row-reverse;
+      }
+
+      .input-wrapper {
+        flex-direction: row-reverse;
+      } */
+      .messageHeader {
+        font-size: 12px;
+        margin-bottom: 14px;
+      }
+
+    }
+
+
+    `],
 })
 export class TopicDetailsPage implements OnInit {
 
@@ -69,6 +91,10 @@ export class TopicDetailsPage implements OnInit {
   private modalCtrl = inject(ModalController);
   private toastController = inject(ToastController);
   private route = inject(ActivatedRoute);
+  private authService = inject(AuthService);
+
+  user: User | null = null;
+  message: string = '';
 
   /**
    * Fetch all the current topic according to the topicId during the ngOnInit hook
@@ -76,6 +102,7 @@ export class TopicDetailsPage implements OnInit {
   ngOnInit(): void {
     this.topicId = this.route.snapshot.params['topicId'];
     this.topic$ = this.topicService.findOne(this.topicId as string);
+    this.user = this.authService.getUser();
   }
 
   /**
@@ -107,6 +134,18 @@ export class TopicDetailsPage implements OnInit {
     }
   }
 
+  sendMessage(): void {
+    const message = {
+      message: this.message,
+      author: this.user?.uid ?? '',
+      username: this.user?.username ?? '',
+      dateTime: Date.now()
+    };
+
+    this.topicService.createPost(this.topicId as string, message as Post);
+    this.message = '';
+  }
+
   /**
    * @private method to create a new {Post}
    *
@@ -116,24 +155,50 @@ export class TopicDetailsPage implements OnInit {
     try {
       this.topicService.createPost(this.topicId as string, post);
 
-      const toast = await this.toastController.create({
-        message: `Post ${post.name} successfully added`,
-        duration: 1500,
-        position: 'bottom',
-        color: 'success'
-      });
+      // const toast = await this.toastController.create({
+      //   message: `Post ${post.name} successfully added`,
+      //   duration: 1500,
+      //   position: 'bottom',
+      //   color: 'success'
+      // });
 
-      await toast.present();
+      // await toast.present();
     } catch (e) {
-      const toast = await this.toastController.create({
-        message: `Failed adding Post ${post.name}`,
-        duration: 1500,
-        position: 'bottom',
-        color: 'danger'
-      });
+      // const toast = await this.toastController.create({
+      //   message: `Failed adding Post ${post.name}`,
+      //   duration: 1500,
+      //   position: 'bottom',
+      //   color: 'danger'
+      // });
 
-      await toast.present();
+      // await toast.present();
     }
+  }
+
+  timestampToDate(timestamp: number) {
+    var date = new Date(timestamp);
+
+    let messageDate = '';
+
+    if(this.isToday(date)) {
+      messageDate += "today at ";
+    }
+    else {
+      messageDate += `${date.getDate()}/${date.getMonth()}/${date.getFullYear()} at `;
+    }
+
+    messageDate += ` ${date.getHours()} : ${date.getMinutes()} `
+
+    return messageDate;
+  }
+
+  private isToday(date: Date): boolean {
+    const today = new Date();
+
+    return date.getDate() == today.getDate() &&
+    date.getMonth() == today.getMonth() &&
+    date.getFullYear() == today.getFullYear()
+
   }
 
 }

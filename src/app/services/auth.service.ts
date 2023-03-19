@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { Firestore , doc, getDoc, addDoc, collection } from '@angular/fire/firestore';
+import { Firestore , doc, getDoc, addDoc, collection, docData, setDoc, DocumentData } from '@angular/fire/firestore';
 // import { AngularFireAuth } from '@angular/fire/compat/auth';
 import { Auth , createUserWithEmailAndPassword, signInWithEmailAndPassword, getAuth, authState, UserCredential } from "@angular/fire/auth";
 import { BehaviorSubject, Observable } from 'rxjs';
@@ -22,63 +22,36 @@ export class AuthService {
 
 
   Onchangeauth(email: string, password: string){
-    console.log(email,password);
-
     return signInWithEmailAndPassword(this.auth, email,password).then((result) => {
-      console.log(result);
+      console.log(result.user);
       return this.SetUserData(result.user);
-      //return this.user$.asObservable();
-      // this.router.navigate(['topic']);
     }).catch(error=>{
       console.log('error', error)
       return "error";
     });
-
-    //return this.user$.asObservable();
-
-    // const userAuth = getAuth();
-    // console.log(userAuth);
-    // this.user$.next();
-
-
-
-
-
   }
 
-  // SignIn(email: string, password: string) {
-  //   this.afAuth.auth().signInWithEmailAndPassword(email, password)
-  //   .then(function(result) {
-  //     // result.user.tenantId should be ‘TENANT_PROJECT_ID’.
-  //   }).catch(function(error) {
-  //     // Handle error.
-  //   });
-
-    // this.afAuth.auth().signIn(email)
-    //   .then(res => {
-    //     console.log('Successfully signed in!');
-    //   })
-    //   .catch(err => {
-    //     console.log('Something is wrong:',err.message);
-    //   });
-  // }
-
   SetUserData(user: any) {
-    // const userRef: AngularFirestoreDocument<any> = this.firestore.doc(
-    //   `users/${user.uid}`
-    // );
-    const userData: User = {
-      uid: user.uid,
-      email: user.email,
-      displayName: user.displayName,
-      photoURL: user.photoURL,
-      emailVerified: user.emailVerified,
-      username: '',
-      password: ''
-    };
-    this.user=userData;
-    this.user$.next(userData);
-    console.log(userData);
+    const docRef = doc(this.firestore,`users/${user.uid}`);
+
+    const userInfo: Observable<any> = docData(docRef);
+
+    let userData: User;
+
+    userInfo.subscribe(
+      data => {
+        userData = {
+          uid: user.uid,
+          email: user.email,
+          photoURL: user.photoURL,
+          username: data.username ,
+          password: ''
+        };
+
+        this.user=userData;
+        this.user$.next(userData);
+      }
+    );
   }
 
   // Sign out
@@ -91,7 +64,6 @@ export class AuthService {
 
   getAuthStatus():boolean {
     const user = this.auth.currentUser;
-    console.log(user);
     if(user){
       return true;
     }else{
@@ -102,16 +74,26 @@ export class AuthService {
 
   getAuth() {
     return this.auth.currentUser;
+  }
 
+  getUser() {
+    return this.user;
   }
 
   createUserAuth(user: User): Promise<UserCredential> {
-    console.log(`password : ${user.password}`);
     return createUserWithEmailAndPassword(this.auth, user.email, user.password);
   }
 
   addUser(user: User): void {
-    const docRef = addDoc(collection(this.firestore, "users"), {username : user.username, email: user.email });
+    const docRefWithSet = setDoc(doc(
+        this.firestore,
+        "users",
+        user.uid
+      ),
+      {username : user.username, email: user.email}
+      )
+
+    // const docRef = addDoc(collection(this.firestore, 'users'), {username : user.username, email: user.email});
   }
 }
 

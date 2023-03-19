@@ -1,7 +1,7 @@
+import { Post } from './../models/post';
 import { inject, Injectable } from '@angular/core';
-import { Firestore, collection, collectionData, doc, docData, addDoc , deleteDoc, CollectionReference, query, where} from '@angular/fire/firestore';
-import { BehaviorSubject, map, Observable, switchMap } from 'rxjs';
-import { Post } from '../models/post';
+import { Firestore, collection, collectionData, doc, docData, addDoc , deleteDoc, CollectionReference, query, where, orderBy} from '@angular/fire/firestore';
+import { BehaviorSubject, map, Observable, switchMap, filter } from 'rxjs';
 import { Topic } from '../models/topic';
 import { User } from '../models/user';
 import { AuthService } from './auth.service';
@@ -27,22 +27,16 @@ export class TopicService {
   }
 
   getAll():Observable<Topic[]>{
-   // Create a reference to the cities collection
-   //var topicsRef = this.firestore.collection("topics");
-
-    // Create a query against the collection.
-    //var q = query(topicsRef, where("creator", "==", "CA"));
-
     const collectionRef = collection(this.firestore,`topics`) as CollectionReference<Topic>;
-    let uid= this.authService.getAuth()?.uid;
-    console.log(uid);
-    return collectionData<Topic>(query(collectionRef, where("creator", "==", uid)));
+    let uid = this.authService.getAuth()?.uid;
+    return collectionData<Topic>(query(collectionRef, where("creator", "==", uid) ), {idField:'id'});
    // return collectionData<Topic>(collectionRef, {idField:'id'});
   }
 
   getAllPosts(id:string):Observable<Post[]>{
     const collectionRef = collection(this.firestore,`topics/${id}/posts`) as CollectionReference<Post>;
-    return collectionData<Post>(collectionRef, {idField:'id'});
+
+    return collectionData<Post>(collectionRef , {idField:'id'});
   }
 
   findOnePost(topicId: string, postId: string): Observable<any>{
@@ -62,11 +56,12 @@ export class TopicService {
     const collectionRef = collection(this.firestore,`topics/${id}/posts`) as CollectionReference<Post>;
 
     return docData(docRef,{idField:'id'}).pipe(
-      switchMap(topic=> collectionData(collectionRef, {idField:'id'}).pipe(
-        map(posts=>({
+      switchMap(topic=> collectionData(query(collectionRef, orderBy('dateTime', 'asc')), {idField:'id'}).pipe(
+        map(posts => ({
           ...topic,
           posts
-        }))
+        })
+        )
       ))
     );
   }
