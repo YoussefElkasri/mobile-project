@@ -25,57 +25,57 @@ import { CreatePostComponent } from './modals/create-post/create-post.component'
   template: `
   <ng-container *ngIf="topic$ | async as topic$">
     <ion-header>
-    <ion-toolbar>
-      <ion-buttons slot="start">
-        <ion-button fill="clear" color="primary" [routerLink]="['/']">
-          <ion-icon name="arrow-back-outline"></ion-icon>
-        </ion-button>
-      </ion-buttons>
-      <ion-title>{{topic$?.name}}</ion-title>
-    </ion-toolbar>
-  </ion-header>
+      <ion-toolbar>
+        <ion-buttons slot="start">
+          <ion-button fill="clear" color="primary" [routerLink]="['/']">
+            <ion-icon name="arrow-back-outline"></ion-icon>
+          </ion-button>
+        </ion-buttons>
+        <ion-title>{{topic$?.name}}</ion-title>
+      </ion-toolbar>
+    </ion-header>
 
-  <ion-content>
-    <ion-list>
-      <ion-item *ngFor="let post of topic$?.posts" class="message">
-        <ion-avatar slot="start">
-          <ion-img src="{{post.profileLink}}" />
-        </ion-avatar>
-        <div class="messageInfo" (click)="open(post.author, topic$.creator, post)">
-          <ion-label class="messageHeader" shape="round" slot="start">
-            {{ post.username }}
-            {{ this.timestampToDate(post.dateTime) }}
-          </ion-label>
-          <ion-label>{{ post.message }}</ion-label>
-        </div>
-
-      </ion-item>
-    </ion-list>
-    <ion-modal #modal isOpen={{isOpen}} [initialBreakpoint]="0.17" (willDismiss)="isOpen=false">
-    <ng-template>
-      <ion-content>
-        <ion-list>
-          <ion-item *ngIf="this.user !== null && this.auhtorOfModalOpening === this.user.uid"
-          (click)="editPost()">
-            <ion-icon name="create-outline" slot="start"></ion-icon>
-            <ion-label>
-              edit
+    <ion-content>
+      <ion-list>
+        <ion-item *ngFor="let post of topic$?.posts" class="message">
+          <ion-avatar slot="start">
+            <ion-img src="{{post.profileLink}}" />
+          </ion-avatar>
+          <div class="messageInfo" (click)="open(post.author, topic$, post)">
+            <ion-label class="messageHeader" shape="round" slot="start">
+              {{ post.username }}
+              {{ this.timestampToDate(post.dateTime) }}
             </ion-label>
-          </ion-item>
-          <ion-item *ngIf="this.user !== null && (this.auhtorOfModalOpening === this.user.uid || this.user.uid ===  this.topic$.creator)"
-          (click)="deletePost()">
-            <ion-icon name="trash-outline" slot="start"></ion-icon>
-            <ion-label>
-              delete
-            </ion-label>
-          </ion-item>
-        </ion-list>
-      </ion-content>
-    </ng-template>
-  </ion-modal>
-  </ion-content>
+            <ion-label>{{ post.message }}</ion-label>
+          </div>
 
-  <ion-item vertical="bottom">
+        </ion-item>
+      </ion-list>
+      <ion-modal #modal isOpen={{isOpen}} [initialBreakpoint]="0.17" (willDismiss)="isOpen=false" >
+        <ng-template>
+          <ion-content>
+            <ion-list>
+              <ion-item *ngIf="this.user !== null && this.auhtorOfModalOpening === this.user.uid"
+              (click)="editPost()">
+                <ion-icon name="create-outline" slot="start"></ion-icon>
+                <ion-label>
+                  edit
+                </ion-label>
+              </ion-item>
+              <ion-item *ngIf="this.user !== null && (this.auhtorOfModalOpening === this.user.uid || this.user.uid ===  this.topic$.creator)"
+              (click)="deletePost()">
+                <ion-icon name="trash-outline" slot="start"></ion-icon>
+                <ion-label>
+                  delete
+                </ion-label>
+              </ion-item>
+            </ion-list>
+          </ion-content>
+        </ng-template>
+      </ion-modal>
+    </ion-content>
+
+  <ion-item vertical="bottom" *ngIf="this.user && !topic$.invitesRead.includes(this.user.email)" >
       <ion-input [(ngModel)]="message" placeholder="Say hello !"></ion-input>
       <ion-fab-button size="small" (click)="sendMessage()">
         <ion-icon name="send" size="small" ></ion-icon>
@@ -249,9 +249,11 @@ export class TopicDetailsPage implements OnInit {
 
   }
 
-  open(author: string, creator: string, post: Post) {
-    console.log(`author : ${author} && creator : ${creator} && user.uid : ${this.user?.uid}`)
-    if(this.user && (this.user.uid === author || this.user.uid === creator )){
+  open(author: string, topic: Topic, post: Post) {
+    if(this.user && topic.invitesRead.includes(this.user.email))
+      return;
+      
+    if(this.user && (this.user.uid === author || this.user.uid === topic.creator )){
       this.isOpen = true;
       this.auhtorOfModalOpening = author;
       this.postModalOpening = post;
