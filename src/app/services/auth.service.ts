@@ -45,7 +45,7 @@ export class AuthService {
           email: user.email,
           profileLink: data.profileLink,
           username: data.username ,
-          password: ''
+          password: '',
           invitations: data.invitations
         };
 
