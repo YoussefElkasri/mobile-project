@@ -1,0 +1,34 @@
+<div>testt</div>
+<!-- <ng-template>
+    <ion-header>
+        <ion-toolbar>
+            <ion-title>Modal</ion-title>
+            <ion-buttons slot="end">
+                <ion-button (click)="close()">Close</ion-button>
+            </ion-buttons>
+        </ion-toolbar>
+    </ion-header>
+    <ion-content class="ion-padding">
+        <p>You have received a demande to joint a group of discusion ({{notification.topicName}})</p>
+        <div>
+            <ion-button (click)="accept()">Yes</ion-button>
+            <ion-button (click)="close()">No</ion-button>
+        </div>
+    </ion-content>
+</ng-template> -->
+
+<ion-header translucent>
+    <ion-toolbar>
+        <ion-buttons slot="start">
+            <ion-button fill="clear" color="primary" (click)="close()">Close</ion-button>
+        </ion-buttons>
+        <ion-title>Modal Content</ion-title>
+    </ion-toolbar>
+</ion-header>
+<ion-content fullscreen>
+    <p>You have received a demande to joint a group of discusion ({{notification.topicName}})</p>
+    <div>
+        <ion-button (click)="accept()">Yes</ion-button>
+        <ion-button (click)="close()">No</ion-button>
+    </div>
+</ion-content>

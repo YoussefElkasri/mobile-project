@@ -44,14 +44,12 @@ export class AuthComponent implements OnInit {
       // const user: User = {
       //   ...this.authForm.value,
       // };
-      console.log(this.authForm.value);
       this.authService.Onchangeauth(this.authForm.value.email,this.authForm.value.password).then(res=>{
         if(res=="error"){
           this.identifiantPassError=true;
         }else{
           this.router.navigate(['topic']);
         }
-        console.log(res);
       }).catch(error=>{
         console.log(error);
       })

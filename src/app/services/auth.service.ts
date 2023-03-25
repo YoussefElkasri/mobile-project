@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { Firestore , doc, getDoc, addDoc, collection } from '@angular/fire/firestore';
+import { Firestore , doc, getDoc, addDoc, collection, docData } from '@angular/fire/firestore';
 // import { AngularFireAuth } from '@angular/fire/compat/auth';
 import { Auth , createUserWithEmailAndPassword, signInWithEmailAndPassword, getAuth, authState, UserCredential } from "@angular/fire/auth";
 import { BehaviorSubject, Observable } from 'rxjs';
@@ -16,29 +16,20 @@ export class AuthService {
 
 
   private firestore= inject(Firestore);
-  private user$:BehaviorSubject<User> = new BehaviorSubject({} as User);
+  public user$:BehaviorSubject<User> = new BehaviorSubject({} as User);
   user!:User;
   constructor(public auth: Auth,public router: Router,) { }
 
 
   Onchangeauth(email: string, password: string){
-    console.log(email,password);
 
     return signInWithEmailAndPassword(this.auth, email,password).then((result) => {
-      console.log(result);
       return this.SetUserData(result.user);
-      //return this.user$.asObservable();
-      // this.router.navigate(['topic']);
+
     }).catch(error=>{
       console.log('error', error)
       return "error";
     });
-
-    //return this.user$.asObservable();
-
-    // const userAuth = getAuth();
-    // console.log(userAuth);
-    // this.user$.next();
 
 
 
@@ -56,7 +47,6 @@ export class AuthService {
 
     // this.afAuth.auth().signIn(email)
     //   .then(res => {
-    //     console.log('Successfully signed in!');
     //   })
     //   .catch(err => {
     //     console.log('Something is wrong:',err.message);
@@ -64,21 +54,26 @@ export class AuthService {
   // }
 
   SetUserData(user: any) {
-    // const userRef: AngularFirestoreDocument<any> = this.firestore.doc(
-    //   `users/${user.uid}`
-    // );
-    const userData: User = {
-      uid: user.uid,
-      email: user.email,
-      displayName: user.displayName,
-      photoURL: user.photoURL,
-      emailVerified: user.emailVerified,
-      username: '',
-      password: ''
-    };
-    this.user=userData;
-    this.user$.next(userData);
-    console.log(userData);
+    const docRef = doc(this.firestore,`users/${user.uid}`);
+
+    const userInfo: Observable<any> = docData(docRef);
+
+    let userData: User;
+    userInfo.subscribe(
+      data => {
+        userData = {
+          uid: user.uid,
+          email: user.email,
+          photoURL: user.photoURL,
+          username: data.username ,
+          password: '',
+          invitations: data.invitations
+        };
+
+        this.user=userData;
+        this.user$.next(userData);
+      }
+    );
   }
 
   // Sign out
@@ -91,7 +86,6 @@ export class AuthService {
 
   getAuthStatus():boolean {
     const user = this.auth.currentUser;
-    console.log(user);
     if(user){
       return true;
     }else{
@@ -102,11 +96,13 @@ export class AuthService {
 
   getAuth() {
     return this.auth.currentUser;
+  }
 
+  getUser() {
+    return this.user;
   }
 
   createUserAuth(user: User): Promise<UserCredential> {
-    console.log(`password : ${user.password}`);
     return createUserWithEmailAndPassword(this.auth, user.email, user.password);
   }
 

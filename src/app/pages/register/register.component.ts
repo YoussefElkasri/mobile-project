@@ -54,9 +54,7 @@ export class RegisterComponent implements OnInit {
       username: values.username,
       email: values.email,
       password: values.password,
-      displayName: '',
       photoURL: '',
-      emailVerified: false
     }
 
     this.authService.createUserAuth(user)
