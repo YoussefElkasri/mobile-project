@@ -1,3 +1,4 @@
+import { Post } from './../models/post';
 import { inject, Injectable } from '@angular/core';
 import { Firestore, collection, collectionData, doc, docData, addDoc , deleteDoc, CollectionReference, query, where, getDocs , updateDoc} from '@angular/fire/firestore';
 import { BehaviorSubject, map, Observable, switchMap } from 'rxjs';
@@ -31,8 +32,8 @@ export class TopicService {
 
   getAll():Observable<Topic[]>{
     const collectionRef = collection(this.firestore,`topics`) as CollectionReference<Topic>;
-    let uid= this.authService.getAuth()?.uid;
-    return collectionData<Topic>(query(collectionRef, where("creator", "==", uid)));
+    let uid = this.authService.getAuth()?.uid;
+    return collectionData<Topic>(query(collectionRef, where("creator", "==", uid) ), {idField:'id'});
    // return collectionData<Topic>(collectionRef, {idField:'id'});
   }
 
@@ -52,7 +53,8 @@ export class TopicService {
 
   getAllPosts(id:string):Observable<Post[]>{
     const collectionRef = collection(this.firestore,`topics/${id}/posts`) as CollectionReference<Post>;
-    return collectionData<Post>(collectionRef, {idField:'id'});
+
+    return collectionData<Post>(collectionRef , {idField:'id'});
   }
 
   findOnePost(topicId: string, postId: string): Observable<any>{
@@ -72,11 +74,12 @@ export class TopicService {
     const collectionRef = collection(this.firestore,`topics/${id}/posts`) as CollectionReference<Post>;
 
     return docData(docRef,{idField:'id'}).pipe(
-      switchMap(topic=> collectionData(collectionRef, {idField:'id'}).pipe(
-        map(posts=>({
+      switchMap(topic=> collectionData(query(collectionRef, orderBy('dateTime', 'asc')), {idField:'id'}).pipe(
+        map(posts => ({
           ...topic,
           posts
-        }))
+        })
+        )
       ))
     );
   }
@@ -138,6 +141,16 @@ export class TopicService {
 
     if(collectionRef != null) {
       const docRef = addDoc(collectionRef, post);
+    }
+  }
+
+  updatePost(topicId: string, post: Post) {
+    const docRef = doc(this.firestore, `topics/${topicId}/posts`, post.id);
+
+    if(docRef != null) {
+      updateDoc(docRef, {
+        message: post.message
+      });
     }
   }
 

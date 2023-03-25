@@ -1,5 +1,6 @@
 import { inject, Injectable } from '@angular/core';
-import { Firestore , doc, getDoc, addDoc, collection, docData } from '@angular/fire/firestore';
+import { Firestore , doc, getDoc, addDoc, collection, docData, setDoc, DocumentData } from '@angular/fire/firestore';
+
 // import { AngularFireAuth } from '@angular/fire/compat/auth';
 import { Auth , createUserWithEmailAndPassword, signInWithEmailAndPassword, getAuth, authState, UserCredential } from "@angular/fire/auth";
 import { BehaviorSubject, Observable } from 'rxjs';
@@ -22,36 +23,13 @@ export class AuthService {
 
 
   Onchangeauth(email: string, password: string){
-
     return signInWithEmailAndPassword(this.auth, email,password).then((result) => {
       return this.SetUserData(result.user);
-
     }).catch(error=>{
       console.log('error', error)
       return "error";
     });
-
-
-
-
-
   }
-
-  // SignIn(email: string, password: string) {
-  //   this.afAuth.auth().signInWithEmailAndPassword(email, password)
-  //   .then(function(result) {
-  //     // result.user.tenantId should be ‘TENANT_PROJECT_ID’.
-  //   }).catch(function(error) {
-  //     // Handle error.
-  //   });
-
-    // this.afAuth.auth().signIn(email)
-    //   .then(res => {
-    //   })
-    //   .catch(err => {
-    //     console.log('Something is wrong:',err.message);
-    //   });
-  // }
 
   SetUserData(user: any) {
     const docRef = doc(this.firestore,`users/${user.uid}`);
@@ -59,14 +37,15 @@ export class AuthService {
     const userInfo: Observable<any> = docData(docRef);
 
     let userData: User;
+
     userInfo.subscribe(
       data => {
         userData = {
           uid: user.uid,
           email: user.email,
-          photoURL: user.photoURL,
+          profileLink: data.profileLink,
           username: data.username ,
-          password: '',
+          password: ''
           invitations: data.invitations
         };
 
@@ -107,7 +86,15 @@ export class AuthService {
   }
 
   addUser(user: User): void {
-    const docRef = addDoc(collection(this.firestore, "users"), {username : user.username, email: user.email });
+    const docRefWithSet = setDoc(doc(
+        this.firestore,
+        "users",
+        user.uid
+      ),
+      {username : user.username, email: user.email, profileLink: user.profileLink}
+      )
+
+    // const docRef = addDoc(collection(this.firestore, 'users'), {username : user.username, email: user.email});
   }
 }
 

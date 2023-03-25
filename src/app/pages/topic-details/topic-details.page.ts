@@ -1,9 +1,11 @@
+import { User } from 'src/app/models/user';
+import { AuthService } from 'src/app/services/auth.service';
 import { CommonModule, NgFor } from '@angular/common';
 import { Component, inject, OnInit } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { IonicModule, ModalController, ToastController } from '@ionic/angular';
-import { EMPTY, Observable } from 'rxjs';
+import { EMPTY, Observable, map } from 'rxjs';
 import { Post } from 'src/app/models/post';
 import { Topic } from 'src/app/models/topic';
 import { TopicService } from 'src/app/services/topic.service';
@@ -35,40 +37,99 @@ import { CreatePostComponent } from './modals/create-post/create-post.component'
 
   <ion-content>
     <ion-list>
-      <!-- Sliding item with text options on both sides -->
-      <ion-item-sliding *ngFor="let post of topic$?.posts">
-        <ion-item [routerLink]="['post/' + post.id ]" routerLinkActive="active" lines="none">
-          <ion-label>{{ post.name }}</ion-label>
-        </ion-item>
+      <ion-item *ngFor="let post of topic$?.posts" class="message">
+        <ion-avatar slot="start">
+          <ion-img src="{{post.profileLink}}" />
+        </ion-avatar>
+        <div class="messageInfo" (click)="open(post.author, topic$.creator, post)">
+          <ion-label class="messageHeader" shape="round" slot="start">
+            {{ post.username }}
+            {{ this.timestampToDate(post.dateTime) }}
+          </ion-label>
+          <ion-label>{{ post.message }}</ion-label>
+        </div>
 
-        <ion-item-options side="end">
-          <ion-item-option (click)="delete(topic$!, post)" color="danger">
-            <ion-icon slot="icon-only" name="trash"></ion-icon>
-          </ion-item-option>
-        </ion-item-options>
-      </ion-item-sliding>
+      </ion-item>
     </ion-list>
-    <ion-fab horizontal="end" vertical="bottom" slot="fixed">
-      <ion-fab-button (click)="openCreatePostModal()">
-        <ion-icon name="add"></ion-icon>
-      </ion-fab-button>
-    </ion-fab>
+    <ion-modal #modal isOpen={{isOpen}} [initialBreakpoint]="0.17" (willDismiss)="isOpen=false">
+    <ng-template>
+      <ion-content>
+        <ion-list>
+          <ion-item *ngIf="this.user !== null && this.auhtorOfModalOpening === this.user.uid"
+          (click)="editPost()">
+            <ion-icon name="create-outline" slot="start"></ion-icon>
+            <ion-label>
+              edit
+            </ion-label>
+          </ion-item>
+          <ion-item *ngIf="this.user !== null && this.auhtorOfModalOpening === (this.user.uid || this.topic$.creator)"
+          (click)="deletePost()">
+            <ion-icon name="trash-outline" slot="start"></ion-icon>
+            <ion-label>
+              delete
+            </ion-label>
+          </ion-item>
+        </ion-list>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
   </ion-content>
+
+  <ion-item vertical="bottom">
+      <ion-input [(ngModel)]="message" placeholder="Say hello !"></ion-input>
+      <ion-fab-button size="small" (click)="sendMessage()">
+        <ion-icon name="send" size="small" ></ion-icon>
+      </ion-fab-button>
+    </ion-item>
+
 </ng-container>
 
 
 `,
-  styles: [],
+  styles: [`
+    .message {
+      /* .messageInfo {
+      text-align: right;
+      flex-direction: row-reverse;
+      }
+
+      .input-wrapper {
+        flex-direction: row-reverse;
+      } */
+      .messageHeader {
+        font-size: 12px;
+        margin-bottom: 14px;
+      }
+    }
+
+    .messageInfo {
+      ion-button {
+        font-size: 7px;
+        width: 13px;
+        padding-left: 0px;
+        padding-right: 0px;
+      }
+    }
+
+    `],
 })
 export class TopicDetailsPage implements OnInit {
+
+  isOpen = false;
+  auhtorOfModalOpening: string = '';
+  postModalOpening: Post | null = null;
+  editMessage = false;
 
   topicId: string | null = null;
   topic$: Observable<Topic | null> = EMPTY;
 
   private topicService = inject(TopicService);
   private modalCtrl = inject(ModalController);
-  private toastController = inject(ToastController);
   private route = inject(ActivatedRoute);
+  private authService = inject(AuthService);
+
+  user: User | null = null;
+  message: string = '';
 
   /**
    * Fetch all the current topic according to the topicId during the ngOnInit hook
@@ -76,6 +137,7 @@ export class TopicDetailsPage implements OnInit {
   ngOnInit(): void {
     this.topicId = this.route.snapshot.params['topicId'];
     this.topic$ = this.topicService.findOne(this.topicId as string);
+    this.user = this.authService.getUser();
   }
 
   /**
@@ -107,6 +169,31 @@ export class TopicDetailsPage implements OnInit {
     }
   }
 
+  sendMessage(): void {
+    if(!this.editMessage){
+      const message = {
+        message: this.message,
+        author: this.user?.uid ?? '',
+        username: this.user?.username ?? '',
+        profileLink: this.user?.profileLink,
+        dateTime: Date.now()
+      };
+
+
+      this.topicService.createPost(this.topicId as string, message as Post);
+      this.message = '';
+    }
+    else {
+      if(this.postModalOpening !== null){
+        this.postModalOpening.message = this.message;
+        this.topicService.updatePost(this.topicId as string, this.postModalOpening as Post);
+        this.message = '';
+        this.editMessage = false;
+      }
+    }
+
+  }
+
   /**
    * @private method to create a new {Post}
    *
@@ -116,23 +203,72 @@ export class TopicDetailsPage implements OnInit {
     try {
       this.topicService.createPost(this.topicId as string, post);
 
-      const toast = await this.toastController.create({
-        message: `Post ${post.name} successfully added`,
-        duration: 1500,
-        position: 'bottom',
-        color: 'success'
-      });
+      // const toast = await this.toastController.create({
+      //   message: `Post ${post.name} successfully added`,
+      //   duration: 1500,
+      //   position: 'bottom',
+      //   color: 'success'
+      // });
 
-      await toast.present();
+      // await toast.present();
     } catch (e) {
-      const toast = await this.toastController.create({
-        message: `Failed adding Post ${post.name}`,
-        duration: 1500,
-        position: 'bottom',
-        color: 'danger'
-      });
+      // const toast = await this.toastController.create({
+      //   message: `Failed adding Post ${post.name}`,
+      //   duration: 1500,
+      //   position: 'bottom',
+      //   color: 'danger'
+      // });
 
-      await toast.present();
+      // await toast.present();
+    }
+  }
+
+  timestampToDate(timestamp: number) {
+    var date = new Date(timestamp);
+
+    let messageDate = '';
+
+    if(this.isToday(date)) {
+      messageDate += "today at ";
+    }
+    else {
+      messageDate += `${date.getDate()}/${date.getMonth()}/${date.getFullYear()} at `;
+    }
+
+    messageDate += ` ${date.getHours()} : ${date.getMinutes()} `
+
+    return messageDate;
+  }
+
+  private isToday(date: Date): boolean {
+    const today = new Date();
+
+    return date.getDate() == today.getDate() &&
+    date.getMonth() == today.getMonth() &&
+    date.getFullYear() == today.getFullYear()
+
+  }
+
+  open(author: string, creator: string, post: Post) {
+    if(this.user && author === (this.user.uid || creator)){
+      this.isOpen = true;
+      this.auhtorOfModalOpening = author;
+      this.postModalOpening = post;
+    }
+  }
+
+  deletePost() {
+    if(this.topicId !== null && this.postModalOpening !== null){
+      this.topicService.deletePost(this.topicId, this.postModalOpening)
+      this.isOpen = false;
+    }
+  }
+
+  editPost() {
+    if(this.postModalOpening !== null && this.postModalOpening.message !== undefined){
+      this.isOpen = false;
+      this.message = this.postModalOpening.message;
+      this.editMessage = true;
     }
   }
 

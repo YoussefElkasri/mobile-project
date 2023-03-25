@@ -1,5 +1,8 @@
 export interface Post {
     id: string;
-    name: string;
-    description: string;
+    message: string;
+    author: string;
+    username: string;
+    dateTime: number;
+    profileLink: string;
 }
