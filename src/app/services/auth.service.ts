@@ -1,5 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { Firestore , doc, getDoc, addDoc, collection, docData, setDoc, DocumentData } from '@angular/fire/firestore';
+
 // import { AngularFireAuth } from '@angular/fire/compat/auth';
 import { Auth , createUserWithEmailAndPassword, signInWithEmailAndPassword, getAuth, authState, UserCredential } from "@angular/fire/auth";
 import { BehaviorSubject, Observable } from 'rxjs';
@@ -16,14 +17,13 @@ export class AuthService {
 
 
   private firestore= inject(Firestore);
-  private user$:BehaviorSubject<User> = new BehaviorSubject({} as User);
+  public user$:BehaviorSubject<User> = new BehaviorSubject({} as User);
   user!:User;
   constructor(public auth: Auth,public router: Router,) { }
 
 
   Onchangeauth(email: string, password: string){
     return signInWithEmailAndPassword(this.auth, email,password).then((result) => {
-      console.log(result.user);
       return this.SetUserData(result.user);
     }).catch(error=>{
       console.log('error', error)
@@ -46,6 +46,7 @@ export class AuthService {
           profileLink: data.profileLink,
           username: data.username ,
           password: ''
+          invitations: data.invitations
         };
 
         this.user=userData;

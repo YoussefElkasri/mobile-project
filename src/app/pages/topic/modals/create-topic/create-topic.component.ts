@@ -8,6 +8,7 @@ import { Topic } from 'src/app/models/topic';
 import { TopicService } from 'src/app/services/topic.service';
 import { UsersModalComponent } from './users-modal/users-modal.component';
 import { User } from 'src/app/models/user';
+import { AuthService } from 'src/app/services/auth.service';
 
 @Component({
   selector: 'app-create-topic',
@@ -22,8 +23,7 @@ import { User } from 'src/app/models/user';
       </ion-buttons>
       <ion-title>Modal Content</ion-title>
       <ion-buttons slot="end">
-        <ion-button fill="clear" color="primary"  type="submit">
-        <!-- [disabled]="createTopicForm.invalid" -->
+        <ion-button fill="clear" color="primary"  type="submit" [disabled]="createTopicForm.invalid">
           <ion-icon name="checkmark-outline"></ion-icon>
         </ion-button>
       </ion-buttons>
@@ -48,8 +48,8 @@ import { User } from 'src/app/models/user';
 
     <ion-list [inset]="true">
     <ion-item [button]="true" [detail]="false" id="select-users">
-      <ion-label>Invitez votre collegues dans votre groupe !</ion-label>
-      <div slot="end" id="selected-fruits">{{ selectedFruitsText }}</div>
+      <ion-label>Invitez vos collegues dans votre groupe !</ion-label>
+      <div slot="end" id="selected-fruits">{{ selectedUsersText }}</div>
     </ion-item>
   </ion-list>
   </ion-content>
@@ -60,8 +60,8 @@ import { User } from 'src/app/models/user';
         class="ion-page"
         title="Favorite Fruits"
         [items]="userItems"
-        [selectedItems]="selectedFruits"
-        (selectionChange)="fruitSelectionChanged($event)"
+        [selectedItems]="selectedUsers"
+        (selectionChange)="usersSelectionChanged($event)"
         (selectionCancel)="modal.dismiss()"
       ></app-users-modal>
     </ng-template>
@@ -76,6 +76,7 @@ export class CreateTopicComponent implements OnInit {
   createTopicForm!: FormGroup;
   users:User[]=[];
   private topicService = inject(TopicService);
+  private authService = inject(AuthService);
   constructor(private modalController: ModalController,
     private formBuilder: FormBuilder,public navCtrl: NavController) {
 
@@ -99,14 +100,16 @@ export class CreateTopicComponent implements OnInit {
   ngOnInit() {
     this.createTopicForm = this.formBuilder.group({
       name: ['', [Validators.required, Validators.minLength(2)]],
-      userList: [[], [Validators.required]],
+      invites: [[], [Validators.required]],
     });
     this.topicService.getAllUsers().subscribe(data=>{
       this.users=data;
       this.users.forEach(user=>{
-        this.userItems.push({text:user.username,value:user.email});
+        if(user.email != this.authService.user.email){
+          this.userItems.push({text:user.username,value:user.email});
+        }
+
       })
-      console.log(this.users);
     });
 
   }
@@ -128,9 +131,7 @@ export class CreateTopicComponent implements OnInit {
    * with the status 'confirmed' and the given {Topic}
    */
   createTopic() {
-    this.createTopicForm.get("userList")?.setValue([{username:"youssef",email:"elkasri.youssef@outlook.fr"}]);
-
-    console.log(this.createTopicForm.value);
+    //this.createTopicForm.get("invites")?.setValue([{username:"youssef",email:"elkasri.youssef@outlook.fr"}]);
     if (this.createTopicForm.valid) {
       const topic: Topic = {
         ...this.createTopicForm.value,
@@ -140,8 +141,8 @@ export class CreateTopicComponent implements OnInit {
   }
 
 
-  selectedFruitsText = 'Aucun utilisateur invité';
-  selectedFruits: string[] = [];
+  selectedUsersText = 'Aucun utilisateur invité';
+  selectedUsers: string[] = [];
 
 
   userItems: Item[] = [];
@@ -155,13 +156,26 @@ export class CreateTopicComponent implements OnInit {
     return `${data.length} items`;
   }
 
-  fruitSelectionChanged(userItems: string[]) {
-    this.selectedFruits = userItems;
-    this.selectedFruitsText = this.formatData(this.selectedFruits);
-    // console.log("test",this.selectedFruitsText);
-    // console.log(this.modal.getCurrentBreakpoint());
-    // this.navCtrl.pop();
-    this.modal.dismiss();
-    console.log(this.modal.getCurrentBreakpoint());
+  usersSelectionChanged(userItems: any[]) {
+    this.selectedUsers=[];
+    userItems.forEach(user=>{
+      this.selectedUsers.push(user.user);
+    });
+    this.selectedUsersText = this.formatData(this.selectedUsers);
+    let userList:any[]=[];
+    userItems.forEach(user=>{
+      let right="";
+      if(!user.right){
+        right="read";
+      }else{
+        right=user.right;
+      }
+      userList.push({email:user.user,right:right})
+    });
+    this.createTopicForm.get("invites")?.setValue(userList);
+    this.modal.onWillDismiss().then((data) => {
+      this.modal.dismiss();
+    });
+
   }
 }

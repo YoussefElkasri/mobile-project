@@ -4,4 +4,8 @@ export interface User {
   email: string;
   password: string;
   profileLink: string;
+  invitations?:[{
+    topicId:string;
+    topicName:string;
+  }]
 }

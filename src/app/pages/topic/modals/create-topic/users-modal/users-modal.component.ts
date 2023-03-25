@@ -1,7 +1,8 @@
 import { NgFor, NgIf } from '@angular/common';
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { ReactiveFormsModule } from '@angular/forms';
-import { IonicModule } from '@ionic/angular';
+import { Component, EventEmitter, inject, Input, OnInit, Output } from '@angular/core';
+import { User } from '@angular/fire/auth';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { IonicModule, ModalController } from '@ionic/angular';
 import { Item } from 'src/app/models/item';
 
 @Component({
@@ -13,6 +14,8 @@ import { Item } from 'src/app/models/item';
 })
 export class UsersModalComponent implements OnInit {
 
+  private modalCtrl = inject(ModalController);
+
   @Input() items: Item[] = [];
   @Input() selectedItems: string[] = [];
   @Input() title = 'Select Items';
@@ -20,11 +23,11 @@ export class UsersModalComponent implements OnInit {
   @Output() selectionCancel = new EventEmitter<void>();
   @Output() selectionChange = new EventEmitter<string[]>();
 
+  droitUsers = new FormControl('');
   filteredItems: Item[] = [];
   workingSelectedValues: string[] = [];
 
   ngOnInit() {
-    console.log(this.filteredItems);
     this.filteredItems = [...this.items];
     this.workingSelectedValues = [...this.selectedItems];
   }
@@ -38,14 +41,31 @@ export class UsersModalComponent implements OnInit {
   }
 
   confirmChanges() {
-    this.selectionChange.emit(this.workingSelectedValues);
-    //this.selectionCancel.emit();
-    console.log(this.workingSelectedValues);
+    let userRight:any[]=[];
+    this.items.forEach(item => {
+      this.workingSelectedValues.forEach(elm=>{
+        if(item.value == elm){
+          userRight.push({user:item.value,right:item.right});
+        }
+      })
+
+    })
+
+    this.selectionChange.emit(userRight);
+    this.modalCtrl.dismiss();
+  }
+
+  selectionUsersChange(value:any){
+    let tab:string[] = value.detail.value.split('-');
+    this.items.forEach(item => {
+      if(item.value == tab[0] ){
+        item.right=tab[1];
+      }
+    });
   }
 
   searchbarInput(ev:any) {
     this.filterList(ev.target.value);
-    console.log(ev.target.value);
   }
 
   /**
@@ -69,9 +89,7 @@ export class UsersModalComponent implements OnInit {
        */
 
       const normalizedQuery = searchQuery.toLowerCase();
-      console.log(normalizedQuery);
       this.filteredItems = this.items.filter(item => {
-        console.log(item);
         return item.value.includes(normalizedQuery);
       });
     }
@@ -93,5 +111,8 @@ export class UsersModalComponent implements OnInit {
       this.workingSelectedValues = this.workingSelectedValues.filter(item => item !== value);
     }
   }
+
+
+
 
 }
