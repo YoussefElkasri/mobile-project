@@ -6,7 +6,7 @@ export interface Topic {
   name: string;
   creator:string;
   invites:Invite[];
-  invitesRead: String[];
-  invitesWrite: String[];
+  invitesRead: string[];
+  invitesWrite: string[];
   posts: Post[];
 }
