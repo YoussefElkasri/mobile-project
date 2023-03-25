@@ -7,6 +7,8 @@ import { CreateTopicComponent } from '../topic/modals/create-topic/create-topic.
 import { AuthService } from 'src/app/services/auth.service';
 import { User } from '../../models/user';
 
+import { uploadBytes, Storage, ref, getDownloadURL } from '@angular/fire/storage';
+
 @Component({
   selector: 'app-register',
   templateUrl: './register.component.html',
@@ -16,9 +18,11 @@ import { User } from '../../models/user';
 })
 export class RegisterComponent implements OnInit {
 
+  profilePicturLink: string | null = null;
+
   registerPassError:boolean = false
   registerForm!: FormGroup;
-  constructor(private formBuilder: FormBuilder, private authService: AuthService, private router: Router) {
+  constructor(private formBuilder: FormBuilder, private authService: AuthService, private router: Router, private storage: Storage) {
 
     this.registerForm = this.formBuilder.group({
       username: ['', [Validators.required, Validators.minLength(2)]],
@@ -58,8 +62,10 @@ export class RegisterComponent implements OnInit {
       username: values.username,
       email: values.email,
       password: values.password,
-      photoURL: ''
+      profileLink: this.profilePicturLink != null ? this.profilePicturLink : 'https://ionicframework.com/docs/img/demos/avatar.svg'
     }
+
+    console.log(user);
 
     this.authService.createUserAuth(user)
     .then( (autUser) =>{
@@ -96,6 +102,20 @@ export class RegisterComponent implements OnInit {
   goBack() {
     this.router.navigate(['login']);
   }
+
+  loadFile(event: any) {
+    let image = document.getElementById("imagePreview");
+    const storageRef = ref(this.storage, `image/${event.target.files[0].name}`);
+    uploadBytes(storageRef, event.target.files[0])
+    .then((snapshot) => {
+      return getDownloadURL(snapshot.ref);
+    })
+    .then(downloadURL => {
+      if(image !== null)
+        image.style.backgroundImage = `url('${downloadURL}')`;
+    })
+
+  };
 
 }
 

@@ -10,6 +10,7 @@ import { environment } from 'src/environments/environment';
 import { AppComponent } from './app.component';
 import { routes } from './routes';
 import { AuthGuard } from './services/auth.service';
+import { provideStorage, getStorage } from '@angular/fire/storage';
 
 @NgModule({
   declarations: [AppComponent],
@@ -19,6 +20,7 @@ import { AuthGuard } from './services/auth.service';
      )),
     provideFirestore(() => getFirestore()),
     provideAuth(() => getAuth()),
+    provideStorage((() => getStorage())),
     CommonModule,
 
     BrowserModule,

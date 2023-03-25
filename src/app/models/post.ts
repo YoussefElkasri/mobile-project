@@ -4,4 +4,5 @@ export interface Post {
     author: string;
     username: string;
     dateTime: number;
+    profileLink: string;
 }

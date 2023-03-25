@@ -1,16 +1,4 @@
 <form [formGroup]="authForm" (ngSubmit)="login()" novalidate>
-    <!-- <ion-header translucent>
-        <ion-toolbar>
-            <ion-title>Authentication</ion-title>
-            <ion-buttons slot="end">
-                <ion-button fill="clear" color="primary" [disabled]="authForm.invalid" type="submit">
-                    <ion-icon name="checkmark-outline"></ion-icon>
-                </ion-button>
-            </ion-buttons>
-        </ion-toolbar>
-    </ion-header> -->
-
-
     <ion-content fullscreen>
         <div class="logo">
             <!-- <ion-icon color="light" name="contact"></ion-icon> -->
@@ -63,12 +51,10 @@
         <br>
         <ion-button color="tertiary" expand="block" shape="round" [routerLink] = "['/register']" routerLinkActive="true">Inscription</ion-button>
 
-        <!-- <ion-item lines="none"> -->
         <div class="center-elm">
             <ion-label color="light" text-center>Ou connectez-vous avec</ion-label>
         </div>
 
-        <!-- </ion-item> -->
         <div class="flex">
             <ion-button color="facebook" shape="round">
                 <ion-icon slot="start" name="logo-facebook"></ion-icon>

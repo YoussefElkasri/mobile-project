@@ -1,6 +1,6 @@
 import { Post } from './../models/post';
 import { inject, Injectable } from '@angular/core';
-import { Firestore, collection, collectionData, doc, docData, addDoc , deleteDoc, CollectionReference, query, where, orderBy} from '@angular/fire/firestore';
+import { Firestore, collection, collectionData, doc, docData, addDoc , deleteDoc, CollectionReference, query, where, orderBy, updateDoc} from '@angular/fire/firestore';
 import { BehaviorSubject, map, Observable, switchMap, filter } from 'rxjs';
 import { Topic } from '../models/topic';
 import { User } from '../models/user';
@@ -96,6 +96,16 @@ export class TopicService {
 
     if(collectionRef != null) {
       const docRef = addDoc(collectionRef, post);
+    }
+  }
+
+  updatePost(topicId: string, post: Post) {
+    const docRef = doc(this.firestore, `topics/${topicId}/posts`, post.id);
+
+    if(docRef != null) {
+      updateDoc(docRef, {
+        message: post.message
+      });
     }
   }
 

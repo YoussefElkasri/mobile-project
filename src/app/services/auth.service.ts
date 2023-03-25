@@ -43,7 +43,7 @@ export class AuthService {
         userData = {
           uid: user.uid,
           email: user.email,
-          photoURL: user.photoURL,
+          profileLink: data.profileLink,
           username: data.username ,
           password: ''
         };
@@ -90,7 +90,7 @@ export class AuthService {
         "users",
         user.uid
       ),
-      {username : user.username, email: user.email}
+      {username : user.username, email: user.email, profileLink: user.profileLink}
       )
 
     // const docRef = addDoc(collection(this.firestore, 'users'), {username : user.username, email: user.email});

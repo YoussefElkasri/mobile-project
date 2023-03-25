@@ -39,16 +39,40 @@ import { CreatePostComponent } from './modals/create-post/create-post.component'
     <ion-list>
       <ion-item *ngFor="let post of topic$?.posts" class="message">
         <ion-avatar slot="start">
-          <img alt="Silhouette of a person's head" src="https://ionicframework.com/docs/img/demos/avatar.svg" />
+          <ion-img src="{{post.profileLink}}" />
         </ion-avatar>
-        <div class="messageInfo">
-          <ion-label class="messageHeader" shape="round" slot="start">{{ post.username }} {{ this.timestampToDate(post.dateTime) }}</ion-label>
-
+        <div class="messageInfo" (click)="open(post.author, topic$.creator, post)">
+          <ion-label class="messageHeader" shape="round" slot="start">
+            {{ post.username }}
+            {{ this.timestampToDate(post.dateTime) }}
+          </ion-label>
           <ion-label>{{ post.message }}</ion-label>
         </div>
 
       </ion-item>
     </ion-list>
+    <ion-modal #modal isOpen={{isOpen}} [initialBreakpoint]="0.17" (willDismiss)="isOpen=false">
+    <ng-template>
+      <ion-content>
+        <ion-list>
+          <ion-item *ngIf="this.user !== null && this.auhtorOfModalOpening === this.user.uid"
+          (click)="editPost()">
+            <ion-icon name="create-outline" slot="start"></ion-icon>
+            <ion-label>
+              edit
+            </ion-label>
+          </ion-item>
+          <ion-item *ngIf="this.user !== null && this.auhtorOfModalOpening === (this.user.uid || this.topic$.creator)"
+          (click)="deletePost()">
+            <ion-icon name="trash-outline" slot="start"></ion-icon>
+            <ion-label>
+              delete
+            </ion-label>
+          </ion-item>
+        </ion-list>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
   </ion-content>
 
   <ion-item vertical="bottom">
@@ -76,20 +100,31 @@ import { CreatePostComponent } from './modals/create-post/create-post.component'
         font-size: 12px;
         margin-bottom: 14px;
       }
-
     }
 
+    .messageInfo {
+      ion-button {
+        font-size: 7px;
+        width: 13px;
+        padding-left: 0px;
+        padding-right: 0px;
+      }
+    }
 
     `],
 })
 export class TopicDetailsPage implements OnInit {
+
+  isOpen = false;
+  auhtorOfModalOpening: string = '';
+  postModalOpening: Post | null = null;
+  editMessage = false;
 
   topicId: string | null = null;
   topic$: Observable<Topic | null> = EMPTY;
 
   private topicService = inject(TopicService);
   private modalCtrl = inject(ModalController);
-  private toastController = inject(ToastController);
   private route = inject(ActivatedRoute);
   private authService = inject(AuthService);
 
@@ -135,15 +170,28 @@ export class TopicDetailsPage implements OnInit {
   }
 
   sendMessage(): void {
-    const message = {
-      message: this.message,
-      author: this.user?.uid ?? '',
-      username: this.user?.username ?? '',
-      dateTime: Date.now()
-    };
+    if(!this.editMessage){
+      const message = {
+        message: this.message,
+        author: this.user?.uid ?? '',
+        username: this.user?.username ?? '',
+        profileLink: this.user?.profileLink,
+        dateTime: Date.now()
+      };
 
-    this.topicService.createPost(this.topicId as string, message as Post);
-    this.message = '';
+
+      this.topicService.createPost(this.topicId as string, message as Post);
+      this.message = '';
+    }
+    else {
+      if(this.postModalOpening !== null){
+        this.postModalOpening.message = this.message;
+        this.topicService.updatePost(this.topicId as string, this.postModalOpening as Post);
+        this.message = '';
+        this.editMessage = false;
+      }
+    }
+
   }
 
   /**
@@ -199,6 +247,29 @@ export class TopicDetailsPage implements OnInit {
     date.getMonth() == today.getMonth() &&
     date.getFullYear() == today.getFullYear()
 
+  }
+
+  open(author: string, creator: string, post: Post) {
+    if(this.user && author === (this.user.uid || creator)){
+      this.isOpen = true;
+      this.auhtorOfModalOpening = author;
+      this.postModalOpening = post;
+    }
+  }
+
+  deletePost() {
+    if(this.topicId !== null && this.postModalOpening !== null){
+      this.topicService.deletePost(this.topicId, this.postModalOpening)
+      this.isOpen = false;
+    }
+  }
+
+  editPost() {
+    if(this.postModalOpening !== null && this.postModalOpening.message !== undefined){
+      this.isOpen = false;
+      this.message = this.postModalOpening.message;
+      this.editMessage = true;
+    }
   }
 
 }
