@@ -8,4 +8,6 @@ export interface Topic {
     creator:string;
     invites:Invite[];
     posts: Post[];
+    invitesRead:string[];
+    invitesWrite:string[];
 }

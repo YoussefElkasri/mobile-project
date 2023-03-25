@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { Firestore, collection, collectionData, doc, docData, addDoc , deleteDoc, CollectionReference, query, where, getDocs , updateDoc, orderBy} from '@angular/fire/firestore';
+import { Firestore, collection, collectionData, doc, docData, addDoc , deleteDoc, CollectionReference, query, where, getDocs , updateDoc, orderBy, getDoc} from '@angular/fire/firestore';
 import { BehaviorSubject, map, Observable, switchMap } from 'rxjs';
 import { Post } from '../models/post';
 import { Topic } from '../models/topic';
@@ -118,6 +118,36 @@ export class TopicService {
       })
 
      });
+  }
+
+  async updateTopic(topic : Topic){
+    console.log(topic);
+    let topicTmp:Topic={
+      id: '',
+      name: '',
+      creator: '',
+      invites: [],
+      posts: [],
+      invitesRead: [],
+      invitesWrite: []
+    };
+    const docRef = doc(this.firestore, "topics", topic.id);
+     topicTmp = (await getDoc(docRef)).data() as Topic;
+     topicTmp.name=topic.name;
+     topic.invites.forEach(invite=>{
+       if(invite.right == "read"){
+         topicTmp.invitesRead.push(invite.email);
+       }else if(invite.right == "write"){
+         topicTmp.invitesWrite.push(invite.email);
+       }
+     });
+     console.log(topicTmp);
+     updateDoc(docRef, {name:topicTmp.name,invitesRead:topicTmp.invitesRead,invitesWrite:topicTmp.invitesWrite});
+  }
+
+  async renameTopic(topic : Topic){
+    const docRef = doc(this.firestore, "topics", topic.id);
+     updateDoc(docRef, {name:topic.name});
   }
 
   /**

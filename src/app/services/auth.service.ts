@@ -58,8 +58,8 @@ export class AuthService {
   // Sign out
   SignOut() {
     return this.auth.signOut().then(() => {
-      localStorage.removeItem('user');
-      this.router.navigate(['sign-in']);
+      //localStorage.removeItem('user');
+      this.router.navigate(['/login']);
     });
   }
 
