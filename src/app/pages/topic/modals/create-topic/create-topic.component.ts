@@ -1,5 +1,5 @@
 import { NgIf } from '@angular/common';
-import { Component, inject, OnInit, ViewChild } from '@angular/core';
+import { Component, inject, Input, OnInit, ViewChild } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { IonicModule, IonModal, ModalController, NavController } from '@ionic/angular';
 import { BehaviorSubject, map, Observable, switchMap } from 'rxjs';
@@ -46,33 +46,40 @@ import { AuthService } from 'src/app/services/auth.service';
       </span>
     </ion-text>
 
-    <ion-list [inset]="true">
-    <ion-item [button]="true" [detail]="false" id="select-users">
-      <ion-label>Invitez vos collegues dans votre groupe !</ion-label>
-      <div slot="end" id="selected-fruits">{{ selectedUsersText }}</div>
-    </ion-item>
-  </ion-list>
+    <div *ngIf="canUpdateUsers">
+      <ion-list [inset]="true" >
+        <ion-item [button]="true" [detail]="false" id="select-users">
+          <ion-label>Invitez vos collegues dans votre groupe !</ion-label>
+          <div slot="end" id="selected-fruits">{{ selectedUsersText }}</div>
+        </ion-item>
+      </ion-list>
+      <ion-modal trigger="select-users" #modal>
+        <ng-template>
+          <app-users-modal
+            class="ion-page"
+            title="Invitez les utilisateurs !"
+            [items]="userItems"
+            [selectedItems]="selectedUsers"
+            (selectionChange)="usersSelectionChanged($event)"
+            (selectionCancel)="modal.dismiss()"
+          ></app-users-modal>
+        </ng-template>
+      </ion-modal>
+    </div>
+
   </ion-content>
 
-  <ion-modal trigger="select-users" #modal>
-    <ng-template>
-      <app-users-modal
-        class="ion-page"
-        title="Favorite Fruits"
-        [items]="userItems"
-        [selectedItems]="selectedUsers"
-        (selectionChange)="usersSelectionChanged($event)"
-        (selectionCancel)="modal.dismiss()"
-      ></app-users-modal>
-    </ng-template>
-  </ion-modal>
+
 </form>
   `,
   styles: [],
 })
 export class CreateTopicComponent implements OnInit {
   @ViewChild('modal', { static: true }) modal!: IonModal;
+  @Input() topic!: Topic;
+  @Input() creator!: boolean;
 
+  canUpdateUsers:boolean=false;
   createTopicForm!: FormGroup;
   users:User[]=[];
   private topicService = inject(TopicService);
@@ -98,19 +105,55 @@ export class CreateTopicComponent implements OnInit {
    * - name: a {string}, which should be not null and has a min length of 2.
    */
   ngOnInit() {
-    this.createTopicForm = this.formBuilder.group({
-      name: ['', [Validators.required, Validators.minLength(2)]],
-      invites: [[], [Validators.required]],
-    });
-    this.topicService.getAllUsers().subscribe(data=>{
-      this.users=data;
-      this.users.forEach(user=>{
-        if(user.email != this.authService.user.email){
-          this.userItems.push({text:user.username,value:user.email});
+
+    console.log(this.topic,this.creator);
+    if(this.topic){
+      this.canUpdateUsers=this.creator;
+      let invites:string[]=[];
+      this.topic.invitesRead.forEach(item=>{
+        if(item){
+          invites.push(item);
+        }
+      });
+      this.topic.invitesWrite.forEach(item=>{
+        if(item){
+          invites.push(item);
         }
 
-      })
-    });
+      });
+      this.createTopicForm = this.formBuilder.group({
+        name: [this.topic.name, [Validators.required, Validators.minLength(2)]],
+        invites: [[], []],
+      });
+      this.topicService.getAllUsers().subscribe(data=>{
+        this.users=data;
+        this.users.forEach(user=>{
+          if(user.email != this.authService.user.email){
+            let i= invites.indexOf(user.email);
+            if(i==-1){
+              this.userItems.push({text:user.username,value:user.email});
+            }
+          }
+        })
+      });
+    }else{
+      this.canUpdateUsers=true;
+      console.log("truuee");
+      this.createTopicForm = this.formBuilder.group({
+        name: ['', [Validators.required, Validators.minLength(2)]],
+        invites: [[], [Validators.required]],
+      });
+      this.topicService.getAllUsers().subscribe(data=>{
+        this.users=data;
+        this.users.forEach(user=>{
+          if(user.email != this.authService.user.email){
+            this.userItems.push({text:user.username,value:user.email});
+          }
+
+        })
+      });
+    }
+
 
   }
 
@@ -133,9 +176,13 @@ export class CreateTopicComponent implements OnInit {
   createTopic() {
     //this.createTopicForm.get("invites")?.setValue([{username:"youssef",email:"elkasri.youssef@outlook.fr"}]);
     if (this.createTopicForm.valid) {
-      const topic: Topic = {
+      let topic: Topic = {
         ...this.createTopicForm.value,
       };
+      if(this.topic){
+        topic.id=this.topic.id;
+      }
+
       this.dismissModal(topic, 'confirmed');
     }
   }

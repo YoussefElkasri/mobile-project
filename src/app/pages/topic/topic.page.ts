@@ -23,6 +23,9 @@ import { ConfirmInvitationComponent } from './modals/confirm-invitation/confirm-
     <ion-title>
       Topics
     </ion-title>
+    <ion-buttons slot="start">
+        <ion-menu-button></ion-menu-button>
+    </ion-buttons>
     <ion-buttons slot="primary">
       <ion-button id="auto-trigger">
         <ion-icon slot="icon-only" name="notifications-outline" ></ion-icon>
@@ -30,19 +33,6 @@ import { ConfirmInvitationComponent } from './modals/confirm-invitation/confirm-
         <ion-popover trigger="auto-trigger" >
         <ng-template>
           <ion-content>
-          <!-- <ion-list>
-            <ion-item  *ngFor="let notification of notifications$ | async" button>
-              <ion-avatar slot="start">
-                <img alt="Silhouette of a person's head" src="https://ionicframework.com/docs/img/demos/avatar.svg" />
-              </ion-avatar>
-              <ion-label>
-                <h3 class="title">{{notification.title}}</h3>
-                <p class="description">{{notification.description}}</p>
-                <p class="date">{{notification.date}}</p>
-              </ion-label>
-            </ion-item>
-          </ion-list> -->
-
             <ion-card  button id="open-modal1">
               <div *ngFor="let notification of notifications$ | async">
 
@@ -62,6 +52,9 @@ import { ConfirmInvitationComponent } from './modals/confirm-invitation/confirm-
         </ng-template>
       </ion-popover>
       </ion-button>
+      <ion-button (click)="logout()">
+        <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
+      </ion-button>
     </ion-buttons>
       <!-- <ion-icon slot="end" name="notifications-outline">
       </ion-icon>
@@ -69,7 +62,31 @@ import { ConfirmInvitationComponent } from './modals/confirm-invitation/confirm-
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
+<ion-menu contentId="main-content">
+      <ion-header>
+        <ion-toolbar>
+          <!-- <ion-title>Menu Content</ion-title> -->
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="ion-padding">
+      <div class="avatar-upload">
+        <div class="avatar-preview">
+          <div id="imagePreview" style="background-image: url('{{profileImg}}');">
+          </div>
+        </div>
+      </div>
+      <div>
+      <!-- <ion-button (click)="updateProfile()">Modifier mon profile</ion-button> -->
+      <ion-list lines="full" class="mt-2">
+        <ion-item (click)="updateProfile()">
+          <ion-label >Modifier mon profile</ion-label>
+        </ion-item>
+      </ion-list>
+        <!-- <p (click)="updateProfile()">Modifier mon profile</p> -->
+      </div>
+      </ion-content>
+</ion-menu>
+<ion-content [fullscreen]="true" id="main-content">
 <ion-searchbar search-icon="search-circle" (ionChange)="test($event.target)" placeholder="Custom Search Icon"></ion-searchbar>
   <ion-list>
     <!-- Sliding item with text options on both sides -->
@@ -82,6 +99,9 @@ import { ConfirmInvitationComponent } from './modals/confirm-invitation/confirm-
         <ion-item-option (click)="delete(topic)" color="danger">
           <ion-icon slot="icon-only" name="trash"></ion-icon>
         </ion-item-option>
+        <ion-item-option (click)="update(topic)" color="primary">
+          <ion-icon slot="icon-only" name="create-outline"></ion-icon>
+        </ion-item-option>
       </ion-item-options>
     </ion-item-sliding>
     <ion-item-sliding *ngFor="let topic of TopicReadinvite">
@@ -89,11 +109,11 @@ import { ConfirmInvitationComponent } from './modals/confirm-invitation/confirm-
         <ion-label>{{ topic.name }}</ion-label>
       </ion-item>
 
-      <ion-item-options side="end">
+      <!-- <ion-item-options side="end">
         <ion-item-option (click)="delete(topic)" color="danger">
           <ion-icon slot="icon-only" name="trash"></ion-icon>
         </ion-item-option>
-      </ion-item-options>
+      </ion-item-options> -->
     </ion-item-sliding>
     <ion-item-sliding *ngFor="let topic of TopicWriteinvite">
       <ion-item [routerLink]="['/topic/' + topic.id ]" routerLinkActive="active" lines="none">
@@ -103,6 +123,9 @@ import { ConfirmInvitationComponent } from './modals/confirm-invitation/confirm-
       <ion-item-options side="end">
         <ion-item-option (click)="delete(topic)" color="danger">
           <ion-icon slot="icon-only" name="trash"></ion-icon>
+        </ion-item-option>
+        <ion-item-option (click)="update(topic)" color="primary">
+          <ion-icon slot="icon-only" name="create-outline"></ion-icon>
         </ion-item-option>
       </ion-item-options>
     </ion-item-sliding>
@@ -124,7 +147,9 @@ import { ConfirmInvitationComponent } from './modals/confirm-invitation/confirm-
   top: 50%;
   transform: translateY(-50%);
 }
-
+.mt-5{
+  margin-top:2rem;
+}
 #container strong {
   font-size: 20px;
   line-height: 26px;
@@ -162,6 +187,24 @@ ion-item::part(native) {
   /* background: #19422d;
   color: #fff; */
 }
+.avatar-upload .avatar-preview {
+    margin: 0 auto;
+    width: 150px;
+    height: 150px;
+    position: relative;
+    border-radius: 100%;
+    border: 6px solid #F8F8F8;
+    box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.1);
+}
+
+.avatar-upload .avatar-preview>div {
+    width: 100%;
+    height: 100%;
+    border-radius: 100%;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+}
 
 ion-item::part(detail-icon) {
   color: white;
@@ -173,7 +216,6 @@ ion-item::part(detail-icon) {
 export class TopicPage implements OnInit {
   // @ViewChild('modalNotif', { static: true }) modalNotif!: IonModal;
 
-  presentingElement:any;
   topics$!: Observable<Topic[]>;
   topicsInvited$!: Observable<Topic[]>;
   notifications$!: Observable<Notif[]>;
@@ -181,6 +223,7 @@ export class TopicPage implements OnInit {
   TopicReadinvite:Topic[]=[];
   TopicWriteinvite:Topic[]=[];
   numberNotifications:number=0;
+  profileImg:string="";
   private topicService = inject(TopicService);
   private authService = inject(AuthService);
   private toastController = inject(ToastController);
@@ -230,6 +273,8 @@ export class TopicPage implements OnInit {
     });
     this.authService.user$.subscribe(user => {
       if(user.uid){
+        this.profileImg= user.profileLink;
+        console.log(this.profileImg);
         this.notifications$= this.topicService.getNotificationForUser(user.uid);
 
         this.notifications$.subscribe(notifications=>{
@@ -240,7 +285,7 @@ export class TopicPage implements OnInit {
             }
           })
         })
-        this.presentingElement = document.querySelector('.ion-page');
+        // this.presentingElement = document.querySelector('.ion-page');
       }
     });
 
@@ -276,11 +321,13 @@ export class TopicPage implements OnInit {
     this.text$.next(event.value.toString())
   }
 
-  // cancelModal(){
-  //   this.topicService.markReadOnNotification(notificationId);
-  //   this.modal.dismiss();
-  // }
+  logout(){
+    this.authService.SignOut();
+  }
 
+  updateProfile(){
+    console.log(this.authService.getAuth());
+  }
   /**
    * Method made to delete the given {Topic} and fetch the new list
    *
@@ -288,6 +335,46 @@ export class TopicPage implements OnInit {
    */
   delete(topic: Topic): void {
     this.topicService.delete(topic);
+  }
+
+  async update(topic: Topic){
+    let canRename=false;
+    topic.invitesWrite.forEach(item=>{
+      if(item == this.authService.getAuth()?.email){
+        canRename=true;
+      }
+    })
+    if(topic.creator == this.authService.getAuth()?.uid){
+      const modal = await this.modalCtrl.create({
+        component: CreateTopicComponent,
+        componentProps: {
+          creator:true,
+          topic: topic,
+        }
+      });
+      modal.present();
+      console.log('test!!');
+      const { data, role } = await modal.onWillDismiss();
+
+      if (role === 'confirmed') {
+        this._updateTopic(data);
+      }
+    }
+    else if(canRename){
+        const modal = await this.modalCtrl.create({
+          component: CreateTopicComponent,
+          componentProps: {
+            creator:false,
+            topic: topic,
+          }
+        });
+        modal.present();
+
+        const { data, role } = await modal.onWillDismiss();
+        if (role === 'confirmed') {
+          this._renameTopic(data);
+        }
+    }
   }
 
   /**
@@ -339,4 +426,53 @@ export class TopicPage implements OnInit {
       await toast.present();
     }
   }
+
+  private async _updateTopic(topic: Topic): Promise<void> {
+    try {
+      this.topicService.updateTopic(topic);
+
+      const toast = await this.toastController.create({
+        message: `Topic ${topic.name} successfully updated`,
+        duration: 1500,
+        position: 'bottom',
+        color: 'success'
+      });
+
+      await toast.present();
+    } catch (e) {
+      const toast = await this.toastController.create({
+        message: `Failed updating Topic ${topic.name}`,
+        duration: 1500,
+        position: 'bottom',
+        color: 'danger'
+      });
+
+      await toast.present();
+    }
+  }
+
+  private async _renameTopic(topic: Topic): Promise<void> {
+    try {
+      this.topicService.renameTopic(topic);
+
+      const toast = await this.toastController.create({
+        message: `Topic ${topic.name} successfully renamed`,
+        duration: 1500,
+        position: 'bottom',
+        color: 'success'
+      });
+
+      await toast.present();
+    } catch (e) {
+      const toast = await this.toastController.create({
+        message: `Failed renaming Topic ${topic.name}`,
+        duration: 1500,
+        position: 'bottom',
+        color: 'danger'
+      });
+
+      await toast.present();
+    }
+  }
+
 }
