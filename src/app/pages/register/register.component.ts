@@ -112,8 +112,10 @@ export class RegisterComponent implements OnInit {
       return getDownloadURL(snapshot.ref);
     })
     .then(downloadURL => {
-      if(image !== null)
+      if(image !== null){
+        this.profilePicturLink = downloadURL;
         image.style.backgroundImage = `url('${downloadURL}')`;
+      }
     })
 
   };

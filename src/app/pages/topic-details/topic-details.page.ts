@@ -2,9 +2,9 @@ import { User } from 'src/app/models/user';
 import { AuthService } from 'src/app/services/auth.service';
 import { CommonModule, NgFor } from '@angular/common';
 import { Component, inject, OnInit } from '@angular/core';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { IonicModule, ModalController, ToastController } from '@ionic/angular';
+import { IonicModule, ModalController } from '@ionic/angular';
 import { EMPTY, Observable, map } from 'rxjs';
 import { Post } from 'src/app/models/post';
 import { Topic } from 'src/app/models/topic';
@@ -62,7 +62,7 @@ import { CreatePostComponent } from './modals/create-post/create-post.component'
               edit
             </ion-label>
           </ion-item>
-          <ion-item *ngIf="this.user !== null && this.auhtorOfModalOpening === (this.user.uid || this.topic$.creator)"
+          <ion-item *ngIf="this.user !== null && (this.auhtorOfModalOpening === this.user.uid || this.user.uid ===  this.topic$.creator)"
           (click)="deletePost()">
             <ion-icon name="trash-outline" slot="start"></ion-icon>
             <ion-label>
@@ -250,7 +250,8 @@ export class TopicDetailsPage implements OnInit {
   }
 
   open(author: string, creator: string, post: Post) {
-    if(this.user && author === (this.user.uid || creator)){
+    console.log(`author : ${author} && creator : ${creator} && user.uid : ${this.user?.uid}`)
+    if(this.user && (this.user.uid === author || this.user.uid === creator )){
       this.isOpen = true;
       this.auhtorOfModalOpening = author;
       this.postModalOpening = post;
