@@ -62,8 +62,8 @@ export class RegisterComponent implements OnInit {
       username: values.username,
       email: values.email,
       password: values.password,
-      profileLink: this.profilePicturLink != null ? this.profilePicturLink : 'https://ionicframework.com/docs/img/demos/avatar.svg'
-
+      profileLink: this.profilePicturLink != null ? this.profilePicturLink : 'https://ionicframework.com/docs/img/demos/avatar.svg',
+      emailVerified: false,
     }
 
     console.log(user);
