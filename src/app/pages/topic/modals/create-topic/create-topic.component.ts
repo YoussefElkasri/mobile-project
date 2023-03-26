@@ -106,7 +106,6 @@ export class CreateTopicComponent implements OnInit {
    */
   ngOnInit() {
 
-    console.log(this.topic,this.creator);
     if(this.topic){
       this.canUpdateUsers=this.creator;
       let invites:string[]=[];
@@ -138,7 +137,6 @@ export class CreateTopicComponent implements OnInit {
       });
     }else{
       this.canUpdateUsers=true;
-      console.log("truuee");
       this.createTopicForm = this.formBuilder.group({
         name: ['', [Validators.required, Validators.minLength(2)]],
         invites: [[], [Validators.required]],

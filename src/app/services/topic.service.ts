@@ -121,7 +121,6 @@ export class TopicService {
   }
 
   async updateTopic(topic : Topic){
-    console.log(topic);
     let topicTmp:Topic={
       id: '',
       name: '',
@@ -141,7 +140,6 @@ export class TopicService {
          topicTmp.invitesWrite.push(invite.email);
        }
      });
-     console.log(topicTmp);
      updateDoc(docRef, {name:topicTmp.name,invitesRead:topicTmp.invitesRead,invitesWrite:topicTmp.invitesWrite});
   }
 

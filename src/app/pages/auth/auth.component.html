@@ -49,20 +49,24 @@
 
         <ion-button color="light" expand="block" shape="round" [disabled]="authForm.invalid" type="submit" fill="outline">Connexion</ion-button>
         <br>
-        <ion-button color="tertiary" expand="block" shape="round" [routerLink] = "['/register']" routerLinkActive="true">Inscription</ion-button>
+        <ion-button color="tertiary" expand="block" shape="round" [routerLink]="['/register']" routerLinkActive="true">Inscription</ion-button>
 
         <div class="center-elm">
             <ion-label color="light" text-center>Ou connectez-vous avec</ion-label>
         </div>
 
         <div class="flex">
-            <ion-button color="facebook" shape="round">
+            <ion-button (click)="signInWithFacebook()" color="facebook" shape="round">
                 <ion-icon slot="start" name="logo-facebook"></ion-icon>
                 Facebook
             </ion-button>
-            <ion-button color="google" shape="round">
+            <ion-button (click)="signInWithGoogle()" color="google" shape="round">
                 <ion-icon slot="start" name="logo-google"></ion-icon>
                 Google
+            </ion-button>
+            <ion-button (click)="signInWithGithub()" color="google" shape="round">
+                <ion-icon slot="start" name="logo-github"></ion-icon>
+                Github
             </ion-button>
         </div>
     </ion-content>

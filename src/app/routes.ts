@@ -27,6 +27,11 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/register/register.component').then( m => m.RegisterComponent)
   },
   {
+    path: 'verifEmail',
+    loadComponent: () => import('./pages/emailVerification.page').then( m => m.EmailVerification),
+    canActivate: [AuthGuard],
+  },
+  {
     path: '',
     redirectTo: 'topic',
     pathMatch: 'full'
