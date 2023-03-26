@@ -39,6 +39,9 @@ export class UpdateProfileComponent implements OnInit {
   }
 
   ngOnInit() {
+    if(this.user){
+      this.registerForm.get('username')?.setValue(this.user.username);
+    }
   }
 
   accept(){

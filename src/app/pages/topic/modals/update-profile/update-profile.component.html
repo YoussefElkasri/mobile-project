@@ -14,7 +14,7 @@
 
     <ion-item lines="full">
       <ion-label position="floating">Username</ion-label>
-      <ion-input type="text" name="username" formControlName="username" value="{{user.username}}" autocomplete="off"></ion-input>
+      <ion-input type="text" name="username" formControlName="username" autocomplete="off"></ion-input>
     </ion-item>
     <ion-text color="danger" *ngIf="controls['username'].touched && controls['username'].errors?.['required']">
       <span>

@@ -198,7 +198,7 @@ export class TopicDetailsPage implements OnInit {
       this.topicService.getAllUsers().subscribe((data_user) => {
         this.users = data_user;
         this.users.forEach((user) => {
-          if (user.uid != data.creator && !alreadyInvit.includes(user.email)) {
+          if (user.email != this.authService.user.email && !alreadyInvit.includes(user.email)) {
             this.userItems.push({ text: user.username, value: user.email });
           }
         });
@@ -381,15 +381,17 @@ export class TopicDetailsPage implements OnInit {
   }
 
   updateInvite() {
-    this.topic$.subscribe(
+
+    this.topicService.getTopic(this.topicId!).then(
       (topic) => {
         console.log(topic)
         if (topic) {
           this.selectedUsers.forEach((user) => {
             (topic as Topic).invites = new Array();
             topic.invites.push(user as unknown as Invite)
-            this.topicService.updateTopic(topic);
           })
+          this.topicService.updateTopic(topic);
+          this.isOpenModalFirend=false;
         }
       }
     )

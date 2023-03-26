@@ -83,6 +83,12 @@ export class TopicService {
     );
   }
 
+
+  async getTopic(topicId: string) {
+    const docRef = doc(this.firestore, "topics", topicId);
+    return (await getDoc(docRef)).data() as Topic
+  }
+
   /**
    * Add a new {Topic} to the list
    *
@@ -95,7 +101,6 @@ export class TopicService {
     let read:string[]=[]
     let write:string[]=[]
     topic.invites.forEach(invite=>{
-      //invites.push(invite.email);
       if(invite.right == "read"){
         read.push(invite.email);
       }
@@ -110,9 +115,6 @@ export class TopicService {
       const docRef = doc(this.firestore, "topics", docTopic.id);
       updateDoc(docRef , {id:docTopic.id});
       topic.invites.forEach(invite=>{
-        //if(collectionRef != null) {
-          //invite.accepted=false;
-         // const docRef = addDoc(collectionRef, invite);
           this.sendInvitation(invite.email,docTopic.id,topic.name);
       //  }
       })
@@ -121,6 +123,7 @@ export class TopicService {
   }
 
   async updateTopic(topic : Topic){
+    console.log(topic)
     let topicTmp:Topic={
       id: '',
       name: '',
@@ -140,7 +143,13 @@ export class TopicService {
          topicTmp.invitesWrite.push(invite.email);
        }
      });
-     updateDoc(docRef, {name:topicTmp.name,invitesRead:topicTmp.invitesRead,invitesWrite:topicTmp.invitesWrite});
+     updateDoc(docRef, {name:topicTmp.name,invitesRead:topicTmp.invitesRead,invitesWrite:topicTmp.invitesWrite})
+
+
+      topic.invites.forEach(invite=>{
+        this.sendInvitation(invite.email, topic.id, topic.name);
+      })
+
   }
 
   async renameTopic(topic : Topic){

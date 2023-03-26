@@ -112,12 +112,6 @@ import { User } from '@capacitor-firebase/authentication/dist/esm/definitions';
           >
             <ion-label>{{ topic.name }}</ion-label>
           </ion-item>
-
-          <!-- <ion-item-options side="end">
-        <ion-item-option (click)="delete(topic)" color="danger">
-          <ion-icon slot="icon-only" name="trash"></ion-icon>
-        </ion-item-option>
-      </ion-item-options> -->
         </ion-item-sliding>
         <ion-item-sliding *ngFor="let topic of TopicWriteinvite">
           <ion-item
