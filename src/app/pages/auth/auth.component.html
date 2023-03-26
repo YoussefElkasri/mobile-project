@@ -55,13 +55,17 @@
         </div>
 
         <div class="flex">
-            <ion-button color="facebook" shape="round">
+            <ion-button (click)="signInWithFacebook()" color="facebook" shape="round">
                 <ion-icon slot="start" name="logo-facebook"></ion-icon>
                 Facebook
             </ion-button>
-            <ion-button color="google" shape="round">
+            <ion-button (click)="signInWithGoogle()" color="google" shape="round">
                 <ion-icon slot="start" name="logo-google"></ion-icon>
                 Google
+            </ion-button>
+            <ion-button (click)="signInWithGithub()" color="google" shape="round">
+                <ion-icon slot="start" name="logo-github"></ion-icon>
+                Github
             </ion-button>
         </div>
     </ion-content>

@@ -135,12 +135,12 @@ export class CreateTopicComponent implements OnInit {
    * - name: a {string}, which should be not null and has a min length of 2.
    */
   ngOnInit() {
-    console.log(this.topic, this.creator);
-    if (this.topic) {
-      this.canUpdateUsers = this.creator;
-      let invites: string[] = [];
-      this.topic.invitesRead.forEach((item) => {
-        if (item) {
+
+    if(this.topic){
+      this.canUpdateUsers=this.creator;
+      let invites:string[]=[];
+      this.topic.invitesRead.forEach(item=>{
+        if(item){
           invites.push(item);
         }
       });
@@ -164,9 +164,8 @@ export class CreateTopicComponent implements OnInit {
           }
         });
       });
-    } else {
-      this.canUpdateUsers = true;
-      console.log('truuee');
+    }else{
+      this.canUpdateUsers=true;
       this.createTopicForm = this.formBuilder.group({
         name: ['', [Validators.required, Validators.minLength(2)]],
         invites: [[], [Validators.required]],

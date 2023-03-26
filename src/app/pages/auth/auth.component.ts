@@ -1,8 +1,8 @@
 import { CommonModule, NgFor } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
-import { IonicModule } from '@ionic/angular';
+import { IonicModule, ToastController } from '@ionic/angular';
 import { User } from 'src/app/models/user';
 import { CreateTopicComponent } from '../topic/modals/create-topic/create-topic.component';
 import { AuthService } from 'src/app/services/auth.service';
@@ -15,6 +15,8 @@ import { AuthService } from 'src/app/services/auth.service';
   imports: [ReactiveFormsModule, IonicModule, RouterModule, CreateTopicComponent, NgFor,CommonModule],
 })
 export class AuthComponent implements OnInit {
+
+  private toastController = inject(ToastController);
 
   identifiantPassError:boolean = false
   authForm!: FormGroup;
@@ -39,16 +41,21 @@ export class AuthComponent implements OnInit {
 
   }
 
-  login(){
+  async login(){
     if (this.authForm.valid) {
       // const user: User = {
       //   ...this.authForm.value,
       // };
-      this.authService.Onchangeauth(this.authForm.value.email,this.authForm.value.password).then(res=>{
+      await this.authService.Onchangeauth(this.authForm.value.email,this.authForm.value.password).then(res=>{
         if(res=="error"){
           this.identifiantPassError=true;
         }else{
-          this.router.navigate(['topic']);
+          if(this.authService.getAuth()?.emailVerified){
+            this.router.navigate(['topic']);
+          }else{
+            this.router.navigate(['verifEmail']);
+          }
+
         }
       }).catch(error=>{
         console.log(error);
@@ -57,6 +64,55 @@ export class AuthComponent implements OnInit {
     }
 
 
+  }
+
+  async signInWithGoogle(){
+    try {
+      await this.authService.signInWithGoogle();
+    } catch (_error: any) {
+      console.log(_error);
+      const toast = await this.toastController.create({
+        message: `Failed to signIn with google`,
+        duration: 1500,
+        position: 'bottom',
+        color: 'danger'
+      });
+
+      await toast.present();
+    }
+
+  }
+
+  async signInWithFacebook(){
+    try {
+      await this.authService.signInWithFacebook();
+    } catch (_error: any) {
+      console.log(_error);
+      const toast = await this.toastController.create({
+        message: `Failed to signIn with facebook`,
+        duration: 1500,
+        position: 'bottom',
+        color: 'danger'
+      });
+
+      await toast.present();
+    }
+  }
+
+  async signInWithGithub(){
+    try {
+      await this.authService.signInWithGithub();
+    } catch (_error: any) {
+      console.log(_error);
+      const toast = await this.toastController.create({
+        message: `Failed to signIn with Github`,
+        duration: 1500,
+        position: 'bottom',
+        color: 'danger'
+      });
+
+      await toast.present();
+    }
   }
 
 }

@@ -1,23 +1,17 @@
 import { UpdateProfileComponent } from './modals/update-profile/update-profile.component';
-import { Component, inject, OnInit, ViewChild } from '@angular/core';
-import {
-  IonicModule,
-  IonModal,
-  ModalController,
-  ToastController,
-} from '@ionic/angular';
+import { Component, inject, OnInit } from '@angular/core';
+import { IonicModule, ModalController, ToastController } from '@ionic/angular';
 import { CreateTopicComponent } from 'src/app/pages/topic/modals/create-topic/create-topic.component';
 import { Topic } from 'src/app/models/topic';
 import { TopicService } from 'src/app/services/topic.service';
 import { RouterModule } from '@angular/router';
 import { NgFor } from '@angular/common';
-import { BehaviorSubject, filter, map, Observable, switchMap } from 'rxjs';
+import { BehaviorSubject, map, Observable, switchMap } from 'rxjs';
 import { CommonModule } from '@angular/common';
-import { UsersModalComponent } from './modals/create-topic/users-modal/users-modal.component';
 import { AuthService } from 'src/app/services/auth.service';
 import { Notif } from 'src/app/models/notification';
-import { Invite } from 'src/app/models/invite';
 import { ConfirmInvitationComponent } from './modals/confirm-invitation/confirm-invitation.component';
+import { User } from '@capacitor-firebase/authentication/dist/esm/definitions';
 
 @Component({
   selector: 'app-home',
@@ -206,16 +200,21 @@ import { ConfirmInvitationComponent } from './modals/confirm-invitation/confirm-
   ],
 })
 export class TopicPage implements OnInit {
+  // ngOnDestroy(): void {
+  //   this.subscribeUser.unsubscribe();
+  // }
   // @ViewChild('modalNotif', { static: true }) modalNotif!: IonModal;
 
   topics$!: Observable<Topic[]>;
   topicsInvited$!: Observable<Topic[]>;
   notifications$!: Observable<Notif[]>;
-  text$: BehaviorSubject<string> = new BehaviorSubject('');
-  TopicReadinvite: Topic[] = [];
-  TopicWriteinvite: Topic[] = [];
-  numberNotifications: number = 0;
-  profileImg: string = '';
+  text$:BehaviorSubject<string>=new BehaviorSubject('');
+  TopicReadinvite:Topic[]=[];
+  TopicWriteinvite:Topic[]=[];
+  numberNotifications:number=0;
+  profileImg:string="";
+  user!:User;
+  subscribeUser:any;
   private topicService = inject(TopicService);
   private authService = inject(AuthService);
   private toastController = inject(ToastController);
@@ -275,13 +274,10 @@ export class TopicPage implements OnInit {
         });
       });
     });
-    this.authService.user$.subscribe((user) => {
-      if (user.uid) {
-        this.profileImg = user.profileLink;
-        console.log(this.profileImg);
-        this.notifications$ = this.topicService.getNotificationForUser(
-          user.uid
-        );
+    this.authService.user$.subscribe(user => {
+      if(user.uid){
+        this.profileImg= user.profileLink;
+        this.notifications$= this.topicService.getNotificationForUser(user.uid);
 
         this.notifications$.subscribe((notifications) => {
           this.numberNotifications = 0;
@@ -371,7 +367,6 @@ export class TopicPage implements OnInit {
         },
       });
       modal.present();
-
       const { data, role } = await modal.onWillDismiss();
 
       if (role === 'confirmed') {
