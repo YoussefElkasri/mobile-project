@@ -1,0 +1,39 @@
+<form [formGroup]="registerForm" (ngSubmit)="accept()" novalidate autocomplete="off">
+  <ion-content fullscreen>
+
+    <div class="avatar-upload">
+        <div class="avatar-edit">
+            <input type='file' id="imageUpload" accept=".png, .jpg, .jpeg, .html" (change)="loadFile($event)" />
+            <label for="imageUpload"></label>
+        </div>
+        <div class="avatar-preview">
+          <div id="imagePreview" style="background-image: url('{{user.profileLink}}');">
+          </div>
+        </div>
+    </div>
+
+    <ion-item lines="full">
+      <ion-label position="floating">Username</ion-label>
+      <ion-input type="text" name="username" formControlName="username" value="{{user.username}}" autocomplete="off"></ion-input>
+    </ion-item>
+    <ion-text color="danger" *ngIf="controls['username'].touched && controls['username'].errors?.['required']">
+      <span>
+        This field is required
+      </span>
+    </ion-text>
+    <ion-text color="danger" *ngIf="controls['username'].touched && controls['username'].errors?.['minlength']">
+      <span>
+        Minimum length 2
+      </span>
+    </ion-text>
+
+
+    <ion-button color="light" expand="block" shape="round" [disabled]="registerForm.invalid" type="submit" fill="outline">Update</ion-button>
+
+    <br>
+
+    <ion-button color="tertiary" expand="block" shape="round" (click)="goBack()">Cancel</ion-button>
+
+
+  </ion-content>
+</form>

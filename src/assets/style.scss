@@ -1,4 +1,9 @@
 ion-content {
-    --ion-background-color: linear-gradient(#008583, #18416a);
-    --ion-color: white;
+  color: white;
+}
+
+ion-header,
+ion-toolbar {
+  --ion-background-color: linear-gradient(#203887, #0c437b);
+  color: white !important;
 }

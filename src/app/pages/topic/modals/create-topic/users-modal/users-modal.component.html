@@ -14,15 +14,15 @@
 </ion-header>
 
 
-<ion-content color="light" class="ion-padding">
+<ion-content class="ion-padding">
     <ion-list id="modal-list" [inset]="true">
         <ion-item *ngFor="let item of filteredItems; trackBy: trackItems">
             <ion-label>{{ item.text }}</ion-label>
             <ion-list>
                 <ion-item>
                     <ion-select (ionChange)="selectionUsersChange($event)" placeholder="Select rule for user" value="{{item.value}}-read">
-                        <ion-select-option value="{{item.value}}-read">Read</ion-select-option>
-                        <ion-select-option value="{{item.value}}-write">Write</ion-select-option>
+                      <ion-select-option value="{{item.value}}-read">Read</ion-select-option>
+                      <ion-select-option value="{{item.value}}-write">Write</ion-select-option>
                     </ion-select>
                 </ion-item>
             </ion-list>

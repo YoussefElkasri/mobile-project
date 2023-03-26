@@ -1,7 +1,6 @@
 <form [formGroup]="authForm" (ngSubmit)="login()" novalidate>
     <ion-content fullscreen>
         <div class="logo">
-            <!-- <ion-icon color="light" name="contact"></ion-icon> -->
             <ion-icon name="person-circle-outline"></ion-icon>
         </div>
 
@@ -12,8 +11,8 @@
         </ion-text>
 
         <ion-item>
-            <ion-label color="light">Identifiant</ion-label>
-            <ion-input color="light" type="mail" placeholder="Adresse email" name="email" formControlName="email" required></ion-input>
+            <ion-label color="light">Identifier</ion-label>
+            <ion-input color="light" type="mail" placeholder="E-mail" name="email" formControlName="email" required></ion-input>
         </ion-item>
         <ion-text color="danger" *ngIf="controls['email'].touched && controls['email'].errors?.['required']">
             <span class="error-text">
@@ -23,13 +22,13 @@
 
         <ion-text color="danger" *ngIf="controls['email'].touched && controls['email'].errors?.['minlength']">
             <span class="error-text">
-                Minimum length 2
+                Minimum length 5
           </span>
         </ion-text>
 
         <ion-item>
             <ion-label color="light">Password</ion-label>
-            <ion-input color="light" type="password" placeholder="Mot de passe" name="password" formControlName="password" required></ion-input>
+            <ion-input color="light" type="password" placeholder="Password" name="password" formControlName="password" required></ion-input>
         </ion-item>
 
         <ion-text color="danger" *ngIf="controls['password'].touched && controls['password'].errors?.['required']">
@@ -39,20 +38,20 @@
         </ion-text>
         <ion-text color="danger" *ngIf="controls['password'].touched && controls['password'].errors?.['minlength']">
             <span class="error-text">
-      Minimum length 2
+      Minimum length 6
           </span>
         </ion-text>
 
         <ion-item lines="none">
-            <ion-button color="light" slot="end" fill="clear">Mot de passe oublié ?</ion-button>
+            <ion-button color="light" slot="end" fill="clear">Forgot your password?</ion-button>
         </ion-item>
 
-        <ion-button color="light" expand="block" shape="round" [disabled]="authForm.invalid" type="submit" fill="outline">Connexion</ion-button>
+        <ion-button color="light" expand="block" shape="round" [disabled]="authForm.invalid" type="submit" fill="outline">Log In</ion-button>
         <br>
-        <ion-button color="tertiary" expand="block" shape="round" [routerLink] = "['/register']" routerLinkActive="true">Inscription</ion-button>
+        <ion-button color="tertiary" expand="block" shape="round" [routerLink] = "['/register']" routerLinkActive="true">Register</ion-button>
 
         <div class="center-elm">
-            <ion-label color="light" text-center>Ou connectez-vous avec</ion-label>
+            <ion-label color="light" text-center>Or log in with</ion-label>
         </div>
 
         <div class="flex">

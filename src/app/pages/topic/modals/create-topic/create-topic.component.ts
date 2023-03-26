@@ -1,7 +1,18 @@
 import { NgIf } from '@angular/common';
 import { Component, inject, Input, OnInit, ViewChild } from '@angular/core';
-import { AbstractControl, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { IonicModule, IonModal, ModalController, NavController } from '@ionic/angular';
+import {
+  AbstractControl,
+  FormBuilder,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
+import {
+  IonicModule,
+  IonModal,
+  ModalController,
+  NavController,
+} from '@ionic/angular';
 import { BehaviorSubject, map, Observable, switchMap } from 'rxjs';
 import { Item } from 'src/app/models/item';
 import { Topic } from 'src/app/models/topic';
@@ -15,79 +26,98 @@ import { AuthService } from 'src/app/services/auth.service';
   standalone: true,
   imports: [ReactiveFormsModule, IonicModule, NgIf, UsersModalComponent],
   template: `
-  <form [formGroup]="createTopicForm" (ngSubmit)="createTopic()" novalidate>
-  <ion-header translucent>
-    <ion-toolbar>
-      <ion-buttons slot="start">
-        <ion-button fill="clear" color="primary" (click)="dismissModal(null, 'canceled')">Close</ion-button>
-      </ion-buttons>
-      <ion-title>Modal Content</ion-title>
-      <ion-buttons slot="end">
-        <ion-button fill="clear" color="primary"  type="submit" [disabled]="createTopicForm.invalid">
-          <ion-icon name="checkmark-outline"></ion-icon>
-        </ion-button>
-      </ion-buttons>
-    </ion-toolbar>
-  </ion-header>
-  <ion-content fullscreen>
-
-    <ion-item lines="full">
-      <ion-label position="floating">Name</ion-label>
-      <ion-input type="text" name="name" formControlName="name" required></ion-input>
-    </ion-item>
-    <ion-text color="danger" *ngIf="controls['name'].touched && controls['name'].errors?.['required']">
-      <span>
-        This field is required
-      </span>
-    </ion-text>
-    <ion-text color="danger" *ngIf="controls['name'].touched && controls['name'].errors?.['minlength']">
-      <span>
-        Minimum length 2
-      </span>
-    </ion-text>
-
-    <div *ngIf="canUpdateUsers">
-      <ion-list [inset]="true" >
-        <ion-item [button]="true" [detail]="false" id="select-users">
-          <ion-label>Invitez vos collegues dans votre groupe !</ion-label>
-          <div slot="end" id="selected-fruits">{{ selectedUsersText }}</div>
+    <form [formGroup]="createTopicForm" (ngSubmit)="createTopic()" novalidate>
+      <ion-header translucent>
+        <ion-toolbar>
+          <ion-buttons slot="start">
+            <ion-button
+              fill="clear"
+              (click)="dismissModal(null, 'canceled')"
+              >Close</ion-button
+            >
+          </ion-buttons>
+          <ion-title>New Topic</ion-title>
+          <ion-buttons slot="end">
+            <ion-button
+              fill="clear"
+              type="submit"
+              [disabled]="createTopicForm.invalid"
+            >
+              <ion-icon name="checkmark-outline"></ion-icon>
+            </ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content fullscreen>
+        <ion-item lines="full">
+          <ion-label position="floating">Name</ion-label>
+          <ion-input
+            type="text"
+            name="name"
+            formControlName="name"
+            required
+          ></ion-input>
         </ion-item>
-      </ion-list>
-      <ion-modal trigger="select-users" #modal>
-        <ng-template>
-          <app-users-modal
-            class="ion-page"
-            title="Invitez les utilisateurs !"
-            [items]="userItems"
-            [selectedItems]="selectedUsers"
-            (selectionChange)="usersSelectionChanged($event)"
-            (selectionCancel)="modal.dismiss()"
-          ></app-users-modal>
-        </ng-template>
-      </ion-modal>
-    </div>
+        <ion-text
+          color="danger"
+          *ngIf="controls['name'].touched && controls['name'].errors?.['required']"
+        >
+          <span> This field is required </span>
+        </ion-text>
+        <ion-text
+          color="danger"
+          *ngIf="controls['name'].touched && controls['name'].errors?.['minlength']"
+        >
+          <span> Minimum length 2 </span>
+        </ion-text>
 
-  </ion-content>
-
-
-</form>
+        <div *ngIf="canUpdateUsers" class="div-share">
+          <ion-list [inset]="true">
+            <ion-item [button]="true" [detail]="false" id="select-users">
+              <ion-label>Share with</ion-label>
+              <div slot="end" id="selected-fruits">{{ selectedUsersText }}</div>
+            </ion-item>
+          </ion-list>
+          <ion-modal trigger="select-users" #modal>
+            <ng-template>
+              <app-users-modal
+                class="ion-page"
+                title="Share with firends !"
+                [items]="userItems"
+                [selectedItems]="selectedUsers"
+                (selectionChange)="usersSelectionChanged($event)"
+                (selectionCancel)="modal.dismiss()"
+              ></app-users-modal>
+            </ng-template>
+          </ion-modal>
+        </div>
+      </ion-content>
+    </form>
   `,
-  styles: [],
+  styles: [
+    `
+      .div-share {
+        box-shadow: 0px 0px 10px 0px #0c437b;
+        border-radius: 20px;
+      }
+    `,
+  ],
 })
 export class CreateTopicComponent implements OnInit {
   @ViewChild('modal', { static: true }) modal!: IonModal;
   @Input() topic!: Topic;
   @Input() creator!: boolean;
 
-  canUpdateUsers:boolean=false;
+  canUpdateUsers: boolean = false;
   createTopicForm!: FormGroup;
-  users:User[]=[];
+  users: User[] = [];
   private topicService = inject(TopicService);
   private authService = inject(AuthService);
-  constructor(private modalController: ModalController,
-    private formBuilder: FormBuilder,public navCtrl: NavController) {
-
-  }
+  constructor(
+    private modalController: ModalController,
+    private formBuilder: FormBuilder,
+    public navCtrl: NavController
+  ) {}
 
   /**
    * Getter for the {FormGroup} controls
@@ -105,56 +135,51 @@ export class CreateTopicComponent implements OnInit {
    * - name: a {string}, which should be not null and has a min length of 2.
    */
   ngOnInit() {
-
-    console.log(this.topic,this.creator);
-    if(this.topic){
-      this.canUpdateUsers=this.creator;
-      let invites:string[]=[];
-      this.topic.invitesRead.forEach(item=>{
-        if(item){
+    console.log(this.topic, this.creator);
+    if (this.topic) {
+      this.canUpdateUsers = this.creator;
+      let invites: string[] = [];
+      this.topic.invitesRead.forEach((item) => {
+        if (item) {
           invites.push(item);
         }
       });
-      this.topic.invitesWrite.forEach(item=>{
-        if(item){
+      this.topic.invitesWrite.forEach((item) => {
+        if (item) {
           invites.push(item);
         }
-
       });
       this.createTopicForm = this.formBuilder.group({
         name: [this.topic.name, [Validators.required, Validators.minLength(2)]],
-        invites: [[], []],
+        invites: [[], [Validators.nullValidator]],
       });
-      this.topicService.getAllUsers().subscribe(data=>{
-        this.users=data;
-        this.users.forEach(user=>{
-          if(user.email != this.authService.user.email){
-            let i= invites.indexOf(user.email);
-            if(i==-1){
-              this.userItems.push({text:user.username,value:user.email});
+      this.topicService.getAllUsers().subscribe((data) => {
+        this.users = data;
+        this.users.forEach((user) => {
+          if (user.email != this.authService.user.email) {
+            let i = invites.indexOf(user.email);
+            if (i == -1) {
+              this.userItems.push({ text: user.username, value: user.email });
             }
           }
-        })
+        });
       });
-    }else{
-      this.canUpdateUsers=true;
-      console.log("truuee");
+    } else {
+      this.canUpdateUsers = true;
+      console.log('truuee');
       this.createTopicForm = this.formBuilder.group({
         name: ['', [Validators.required, Validators.minLength(2)]],
         invites: [[], [Validators.required]],
       });
-      this.topicService.getAllUsers().subscribe(data=>{
-        this.users=data;
-        this.users.forEach(user=>{
-          if(user.email != this.authService.user.email){
-            this.userItems.push({text:user.username,value:user.email});
+      this.topicService.getAllUsers().subscribe((data) => {
+        this.users = data;
+        this.users.forEach((user) => {
+          if (user.email != this.authService.user.email) {
+            this.userItems.push({ text: user.username, value: user.email });
           }
-
-        })
+        });
       });
     }
-
-
   }
 
   /**
@@ -179,24 +204,24 @@ export class CreateTopicComponent implements OnInit {
       let topic: Topic = {
         ...this.createTopicForm.value,
       };
-      if(this.topic){
-        topic.id=this.topic.id;
+      if (this.topic) {
+        topic.id = this.topic.id;
       }
 
       this.dismissModal(topic, 'confirmed');
     }
   }
 
-
-  selectedUsersText = 'Aucun utilisateur invité';
+  selectedUsersText = 'No guest user';
   selectedUsers: string[] = [];
-
 
   userItems: Item[] = [];
 
   private formatData(data: string[]) {
     if (data.length === 1) {
-      const userItem = this.userItems.find(userItem => userItem.value === data[0])
+      const userItem = this.userItems.find(
+        (userItem) => userItem.value === data[0]
+      );
       return userItem!.text;
     }
 
@@ -204,25 +229,24 @@ export class CreateTopicComponent implements OnInit {
   }
 
   usersSelectionChanged(userItems: any[]) {
-    this.selectedUsers=[];
-    userItems.forEach(user=>{
+    this.selectedUsers = [];
+    userItems.forEach((user) => {
       this.selectedUsers.push(user.user);
     });
     this.selectedUsersText = this.formatData(this.selectedUsers);
-    let userList:any[]=[];
-    userItems.forEach(user=>{
-      let right="";
-      if(!user.right){
-        right="read";
-      }else{
-        right=user.right;
+    let userList: any[] = [];
+    userItems.forEach((user) => {
+      let right = '';
+      if (!user.right) {
+        right = 'read';
+      } else {
+        right = user.right;
       }
-      userList.push({email:user.user,right:right})
+      userList.push({ email: user.user, right: right });
     });
-    this.createTopicForm.get("invites")?.setValue(userList);
+    this.createTopicForm.get('invites')?.setValue(userList);
     this.modal.onWillDismiss().then((data) => {
       this.modal.dismiss();
     });
-
   }
 }

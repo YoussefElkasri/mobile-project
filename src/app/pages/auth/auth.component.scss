@@ -9,10 +9,6 @@
 
 .logo {
     font-size: 9em;
-    // position: relative;
-    // top: 50%;
-    // left: 50%;
-    // transform: translate(-50%, -50%);
     display: flex;
     justify-content: center;
     color: white;
@@ -65,3 +61,11 @@
     top: 20px;
     text-align: center;
 }
+
+ion-content {
+  --ion-background-color: linear-gradient(#203887, #0c437b);
+  ion-item {
+    --ion-background-color: transparent;//rgb(3, 8, 101);
+  }
+}
+

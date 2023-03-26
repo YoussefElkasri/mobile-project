@@ -183,6 +183,17 @@ export class TopicService {
     }
   }
 
+  updateUser(user: User) {
+    const docRef = doc(this.firestore, `users/${user.uid}`);
+
+    if(docRef != null) {
+      updateDoc(docRef, {
+        profileLink: user.profileLink,
+        username: user.username
+      });
+    }
+  }
+
   /**
    * Remove a {Post} from the list of {Post} of the {Topic} that match the given topicId
    *

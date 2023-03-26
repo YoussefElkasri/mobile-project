@@ -2,7 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { Firestore , doc, getDoc, addDoc, collection, docData, setDoc, DocumentData } from '@angular/fire/firestore';
 
 // import { AngularFireAuth } from '@angular/fire/compat/auth';
-import { Auth , createUserWithEmailAndPassword, signInWithEmailAndPassword, getAuth, authState, UserCredential } from "@angular/fire/auth";
+import { Auth , createUserWithEmailAndPassword, sendPasswordResetEmail, signInWithEmailAndPassword, UserCredential } from "@angular/fire/auth";
 import { BehaviorSubject, Observable } from 'rxjs';
 // import * as auth from 'firebase/auth';
 
@@ -91,11 +91,16 @@ export class AuthService {
         "users",
         user.uid
       ),
-      {username : user.username, email: user.email, profileLink: user.profileLink}
+      {uid: user.uid, username : user.username, email: user.email, profileLink: user.profileLink}
       )
 
     // const docRef = addDoc(collection(this.firestore, 'users'), {username : user.username, email: user.email});
   }
+
+  resetPassword(email: string){
+    return sendPasswordResetEmail(this.auth, email);
+  }
+
 }
 
 

@@ -22,7 +22,7 @@ import { TopicService } from 'src/app/services/topic.service';
     <ion-header>
     <ion-toolbar>
       <ion-buttons slot="start">
-        <ion-button fill="clear" color="primary" [routerLink]="['/']">
+        <ion-button fill="clear" [routerLink]="['/']">
           <ion-icon name="arrow-back-outline"></ion-icon>
         </ion-button>
       </ion-buttons>

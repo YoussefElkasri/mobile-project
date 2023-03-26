@@ -10,28 +10,26 @@ import { Post } from 'src/app/models/post';
 import { Topic } from 'src/app/models/topic';
 import { TopicService } from 'src/app/services/topic.service';
 import { CreatePostComponent } from './modals/create-post/create-post.component';
+import { UsersModalComponent } from '../topic/modals/create-topic/users-modal/users-modal.component';
+import { Item } from 'src/app/models/item';
+import { Invite } from 'src/app/models/invite';
 
 @Component({
   selector: 'app-topic-details',
   standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    IonicModule,
-    RouterModule,
-    CreatePostComponent,
-    NgFor
-  ],
   template: `
   <ng-container *ngIf="topic$ | async as topic$">
     <ion-header>
       <ion-toolbar>
         <ion-buttons slot="start">
-          <ion-button fill="clear" color="primary" [routerLink]="['/']">
+          <ion-button fill="clear" [routerLink]="['/']">
             <ion-icon name="arrow-back-outline"></ion-icon>
           </ion-button>
         </ion-buttons>
         <ion-title>{{topic$?.name}}</ion-title>
+        <ion-button (click)="addFriend()" slot="end">
+          <ion-icon name="person-add-outline"></ion-icon>
+        </ion-button>
       </ion-toolbar>
     </ion-header>
 
@@ -73,6 +71,37 @@ import { CreatePostComponent } from './modals/create-post/create-post.component'
           </ion-content>
         </ng-template>
       </ion-modal>
+
+      <ion-modal #modalFriend isOpen={{isOpenModalFirend}} [initialBreakpoint]="0.40" (willDismiss)="isOpenModalFirend=false" >
+        <ng-template>
+          <ion-content>
+            <div class="div-share">
+              <ion-list [inset]="true">
+                <ion-item [button]="true" [detail]="false" id="select-users">
+                  <ion-label>Share with</ion-label>
+                  <div slot="end" id="selected-fruits">{{ selectedUsersText }}</div>
+                </ion-item>
+              </ion-list>
+              <ion-modal trigger="select-users" #modal>
+                <ng-template>
+                  <app-users-modal
+                    class="ion-page"
+                    title="Share with firends !"
+                    [items]="userItems"
+                    [selectedItems]="selectedUsers"
+                    (selectionChange)="usersSelectionChanged($event)"
+                    (selectionCancel)="modal.dismiss()"
+                  ></app-users-modal>
+                </ng-template>
+              </ion-modal>
+            </div>
+
+            <ion-button expand="block" shape="round" (click)="updateInvite()">
+              Send invitations
+            </ion-button>
+          </ion-content>
+        </ng-template>
+      </ion-modal>
     </ion-content>
 
   <ion-item vertical="bottom" *ngIf="this.user && !topic$.invitesRead.includes(this.user.email)" >
@@ -86,39 +115,53 @@ import { CreatePostComponent } from './modals/create-post/create-post.component'
 
 
 `,
-  styles: [`
-    .message {
-      /* .messageInfo {
-      text-align: right;
-      flex-direction: row-reverse;
+  styles: [
+    `
+      ion-item::part(native) {
+        border-color: #0c437b;
+        border-width: 0px 0px 1px 0px;
+      }
+      .message {
+        .messageHeader {
+          font-size: 12px;
+          margin-bottom: 14px;
+        }
       }
 
-      .input-wrapper {
-        flex-direction: row-reverse;
-      } */
-      .messageHeader {
-        font-size: 12px;
-        margin-bottom: 14px;
+      .messageInfo {
+        ion-button {
+          font-size: 7px;
+          width: 13px;
+          padding-left: 0px;
+          padding-right: 0px;
+        }
       }
-    }
-
-    .messageInfo {
-      ion-button {
-        font-size: 7px;
-        width: 13px;
-        padding-left: 0px;
-        padding-right: 0px;
+      .div-share {
+        box-shadow: 0px 0px 10px 0px #0c437b;
+        border-radius: 20px;
       }
-    }
-
-    `],
+    `,
+  ],
+  imports: [
+    CommonModule,
+    FormsModule,
+    IonicModule,
+    RouterModule,
+    CreatePostComponent,
+    NgFor,
+    UsersModalComponent,
+  ],
 })
 export class TopicDetailsPage implements OnInit {
-
   isOpen = false;
+  isOpenModalFirend = false;
   auhtorOfModalOpening: string = '';
   postModalOpening: Post | null = null;
   editMessage = false;
+
+  selectedUsersText = 'No guest user';
+  selectedUsers: string[] = [];
+  userItems: Item[] = [];
 
   topicId: string | null = null;
   topic$: Observable<Topic | null> = EMPTY;
@@ -131,6 +174,8 @@ export class TopicDetailsPage implements OnInit {
   user: User | null = null;
   message: string = '';
 
+  users: User[] = [];
+
   /**
    * Fetch all the current topic according to the topicId during the ngOnInit hook
    */
@@ -138,6 +183,27 @@ export class TopicDetailsPage implements OnInit {
     this.topicId = this.route.snapshot.params['topicId'];
     this.topic$ = this.topicService.findOne(this.topicId as string);
     this.user = this.authService.getUser();
+
+    let alreadyInvit: string[] = new Array();
+
+    this.topicService.findOne(this.topicId as string).subscribe((data) => {
+      data.invitesWrite.forEach((element: string) => {
+        alreadyInvit.push(element);
+      });
+
+      data.invitesRead.forEach((element: string) => {
+        alreadyInvit.push(element);
+      });
+
+      this.topicService.getAllUsers().subscribe((data_user) => {
+        this.users = data_user;
+        this.users.forEach((user) => {
+          if (user.uid != data.creator && !alreadyInvit.includes(user.email)) {
+            this.userItems.push({ text: user.username, value: user.email });
+          }
+        });
+      });
+    });
   }
 
   /**
@@ -170,28 +236,28 @@ export class TopicDetailsPage implements OnInit {
   }
 
   sendMessage(): void {
-    if(!this.editMessage){
+    if (!this.editMessage) {
       const message = {
         message: this.message,
         author: this.user?.uid ?? '',
         username: this.user?.username ?? '',
         profileLink: this.user?.profileLink,
-        dateTime: Date.now()
+        dateTime: Date.now(),
       };
-
 
       this.topicService.createPost(this.topicId as string, message as Post);
       this.message = '';
-    }
-    else {
-      if(this.postModalOpening !== null){
+    } else {
+      if (this.postModalOpening !== null) {
         this.postModalOpening.message = this.message;
-        this.topicService.updatePost(this.topicId as string, this.postModalOpening as Post);
+        this.topicService.updatePost(
+          this.topicId as string,
+          this.postModalOpening as Post
+        );
         this.message = '';
         this.editMessage = false;
       }
     }
-
   }
 
   /**
@@ -218,7 +284,6 @@ export class TopicDetailsPage implements OnInit {
       //   position: 'bottom',
       //   color: 'danger'
       // });
-
       // await toast.present();
     }
   }
@@ -228,14 +293,13 @@ export class TopicDetailsPage implements OnInit {
 
     let messageDate = '';
 
-    if(this.isToday(date)) {
-      messageDate += "today at ";
-    }
-    else {
+    if (this.isToday(date)) {
+      messageDate += 'today at ';
+    } else {
       messageDate += `${date.getDate()}/${date.getMonth()}/${date.getFullYear()} at `;
     }
 
-    messageDate += ` ${date.getHours()} : ${date.getMinutes()} `
+    messageDate += ` ${date.getHours()} : ${date.getMinutes()} `;
 
     return messageDate;
   }
@@ -243,17 +307,20 @@ export class TopicDetailsPage implements OnInit {
   private isToday(date: Date): boolean {
     const today = new Date();
 
-    return date.getDate() == today.getDate() &&
-    date.getMonth() == today.getMonth() &&
-    date.getFullYear() == today.getFullYear()
-
+    return (
+      date.getDate() == today.getDate() &&
+      date.getMonth() == today.getMonth() &&
+      date.getFullYear() == today.getFullYear()
+    );
   }
 
   open(author: string, topic: Topic, post: Post) {
-    if(this.user && topic.invitesRead.includes(this.user.email))
-      return;
-      
-    if(this.user && (this.user.uid === author || this.user.uid === topic.creator )){
+    if (this.user && topic.invitesRead.includes(this.user.email)) return;
+
+    if (
+      this.user &&
+      (this.user.uid === author || this.user.uid === topic.creator)
+    ) {
       this.isOpen = true;
       this.auhtorOfModalOpening = author;
       this.postModalOpening = post;
@@ -261,18 +328,70 @@ export class TopicDetailsPage implements OnInit {
   }
 
   deletePost() {
-    if(this.topicId !== null && this.postModalOpening !== null){
-      this.topicService.deletePost(this.topicId, this.postModalOpening)
+    if (this.topicId !== null && this.postModalOpening !== null) {
+      this.topicService.deletePost(this.topicId, this.postModalOpening);
       this.isOpen = false;
     }
   }
 
   editPost() {
-    if(this.postModalOpening !== null && this.postModalOpening.message !== undefined){
+    if (
+      this.postModalOpening !== null &&
+      this.postModalOpening.message !== undefined
+    ) {
       this.isOpen = false;
       this.message = this.postModalOpening.message;
       this.editMessage = true;
     }
   }
 
+  addFriend() {
+    this.isOpenModalFirend = true;
+  }
+
+  private formatData(data: string[]) {
+    if (data.length === 1) {
+      const userItem = this.userItems.find(
+        (userItem) => userItem.value === data[0]
+      );
+      return userItem!.text;
+    }
+
+    return `${data.length} items`;
+  }
+
+  usersSelectionChanged(userItems: any[]) {
+    this.selectedUsers = [];
+    userItems.forEach((user) => {
+      this.selectedUsers.push(user.user);
+    });
+    this.selectedUsersText = this.formatData(this.selectedUsers);
+    let userList: any[] = [];
+    userItems.forEach((user) => {
+      let right = '';
+      if (!user.right) {
+        right = 'read';
+      } else {
+        right = user.right;
+      }
+      userList.push({ email: user.user, right: right });
+    });
+
+    this.selectedUsers = userList;
+  }
+
+  updateInvite() {
+    this.topic$.subscribe(
+      (topic) => {
+        console.log(topic)
+        if (topic) {
+          this.selectedUsers.forEach((user) => {
+            (topic as Topic).invites = new Array();
+            topic.invites.push(user as unknown as Invite)
+            this.topicService.updateTopic(topic);
+          })
+        }
+      }
+    )
+  }
 }

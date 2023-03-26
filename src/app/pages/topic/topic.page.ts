@@ -1,5 +1,11 @@
+import { UpdateProfileComponent } from './modals/update-profile/update-profile.component';
 import { Component, inject, OnInit, ViewChild } from '@angular/core';
-import { IonicModule, IonModal, ModalController, ToastController } from '@ionic/angular';
+import {
+  IonicModule,
+  IonModal,
+  ModalController,
+  ToastController,
+} from '@ionic/angular';
 import { CreateTopicComponent } from 'src/app/pages/topic/modals/create-topic/create-topic.component';
 import { Topic } from 'src/app/models/topic';
 import { TopicService } from 'src/app/services/topic.service';
@@ -16,202 +22,188 @@ import { ConfirmInvitationComponent } from './modals/confirm-invitation/confirm-
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [IonicModule, RouterModule, CreateTopicComponent, NgFor,CommonModule],
+  imports: [
+    IonicModule,
+    RouterModule,
+    CreateTopicComponent,
+    NgFor,
+    CommonModule,
+  ],
   template: `
-  <ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>
-      Topics
-    </ion-title>
-    <ion-buttons slot="start">
-        <ion-menu-button></ion-menu-button>
-    </ion-buttons>
-    <ion-buttons slot="primary">
-      <ion-button id="auto-trigger">
-        <ion-icon slot="icon-only" name="notifications-outline" ></ion-icon>
-        <ion-badge *ngIf="numberNotifications>0" class="small-badge" color="danger">{{numberNotifications}}</ion-badge>
-        <ion-popover trigger="auto-trigger" >
-        <ng-template>
-          <ion-content>
-            <ion-card  button id="open-modal1">
-              <div *ngFor="let notification of notifications$ | async">
+    <ion-header [translucent]="true">
+      <ion-toolbar>
+        <ion-title> Topics </ion-title>
+        <ion-buttons slot="primary">
+          <ion-button id="auto-trigger">
+            <ion-icon slot="icon-only" name="notifications-outline"></ion-icon>
+            <ion-badge
+              *ngIf="numberNotifications > 0"
+              class="small-badge"
+              color="danger"
+              >{{ numberNotifications }}</ion-badge
+            >
+            <ion-popover trigger="auto-trigger">
+              <ng-template>
+                <ion-content>
+                  <ion-card button id="open-modal1">
+                    <div *ngFor="let notification of notifications$ | async">
+                      <div
+                        *ngIf="!notification.readed"
+                        (click)="openNotification(notification)"
+                      >
+                        <ion-card-header>
+                          <p
+                            [class]="
+                              notification.readed
+                                ? 'notification-readed'
+                                : 'notification-no-readed'
+                            "
+                          >
+                            {{ notification.title }}
+                          </p>
+                        </ion-card-header>
 
-              <div *ngIf="!notification.readed" (click)="openNotification(notification)">
-                <ion-card-header >
-                  <p [class]="notification.readed ? 'notification-readed' : 'notification-no-readed'" >{{notification.title}}</p>
-                </ion-card-header>
+                        <ion-card-content>
+                          <p>{{ notification.description }}</p>
+                          <p>{{ notification.date }}</p>
+                        </ion-card-content>
+                      </div>
+                    </div>
+                  </ion-card>
+                </ion-content>
+              </ng-template>
+            </ion-popover>
+          </ion-button>
+          <ion-button (click)="updateProfile()">
+            <ion-icon name="person-outline"></ion-icon>
+          </ion-button>
+          <ion-button (click)="logout()">
+            <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
+          </ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
 
-                <ion-card-content >
-                  <p>{{notification.description}}</p>
-                  <p>{{notification.date}}</p>
-                </ion-card-content>
-              </div>
-            </div>
-            </ion-card>
-          </ion-content>
-        </ng-template>
-      </ion-popover>
-      </ion-button>
-      <ion-button (click)="logout()">
-        <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
-      </ion-button>
-    </ion-buttons>
-      <!-- <ion-icon slot="end" name="notifications-outline">
-      </ion-icon>
-      <ion-badge color="danger">1</ion-badge> -->
-  </ion-toolbar>
-</ion-header>
+    <ion-content [fullscreen]="true" id="main-content">
+      <ion-searchbar
+        search-icon="search-circle"
+        (ionChange)="test($event.target)"
+        placeholder="Custom Search Icon"
+      ></ion-searchbar>
+      <ion-list>
+        <!-- Sliding item with text options on both sides -->
+        <ion-item-sliding *ngFor="let topic of topics$ | async">
+          <ion-item
+            [routerLink]="['/topic/' + topic.id]"
+            routerLinkActive="active"
+            lines="none"
+          >
+            <ion-label>{{ topic.name }}</ion-label>
+          </ion-item>
 
-<ion-menu contentId="main-content">
-      <ion-header>
-        <ion-toolbar>
-          <!-- <ion-title>Menu Content</ion-title> -->
-        </ion-toolbar>
-      </ion-header>
-      <ion-content class="ion-padding">
-      <div class="avatar-upload">
-        <div class="avatar-preview">
-          <div id="imagePreview" style="background-image: url('{{profileImg}}');">
-          </div>
-        </div>
-      </div>
-      <div>
-      <!-- <ion-button (click)="updateProfile()">Modifier mon profile</ion-button> -->
-      <ion-list lines="full" class="mt-2">
-        <ion-item (click)="updateProfile()">
-          <ion-label >Modifier mon profile</ion-label>
-        </ion-item>
-      </ion-list>
-        <!-- <p (click)="updateProfile()">Modifier mon profile</p> -->
-      </div>
-      </ion-content>
-</ion-menu>
-<ion-content [fullscreen]="true" id="main-content">
-<ion-searchbar search-icon="search-circle" (ionChange)="test($event.target)" placeholder="Custom Search Icon"></ion-searchbar>
-  <ion-list>
-    <!-- Sliding item with text options on both sides -->
-    <ion-item-sliding *ngFor="let topic of topics$ | async">
-      <ion-item [routerLink]="['/topic/' + topic.id ]" routerLinkActive="active" lines="none">
-        <ion-label>{{ topic.name }}</ion-label>
-      </ion-item>
+          <ion-item-options side="end">
+            <ion-item-option (click)="delete(topic)" color="danger">
+              <ion-icon slot="icon-only" name="trash"></ion-icon>
+            </ion-item-option>
+            <ion-item-option (click)="update(topic)" color="primary">
+              <ion-icon slot="icon-only" name="create-outline"></ion-icon>
+            </ion-item-option>
+          </ion-item-options>
+        </ion-item-sliding>
+        <ion-item-sliding *ngFor="let topic of TopicReadinvite">
+          <ion-item
+            [routerLink]="['/topic/' + topic.id]"
+            routerLinkActive="active"
+            lines="none"
+          >
+            <ion-label>{{ topic.name }}</ion-label>
+          </ion-item>
 
-      <ion-item-options side="end">
-        <ion-item-option (click)="delete(topic)" color="danger">
-          <ion-icon slot="icon-only" name="trash"></ion-icon>
-        </ion-item-option>
-        <ion-item-option (click)="update(topic)" color="primary">
-          <ion-icon slot="icon-only" name="create-outline"></ion-icon>
-        </ion-item-option>
-      </ion-item-options>
-    </ion-item-sliding>
-    <ion-item-sliding *ngFor="let topic of TopicReadinvite">
-      <ion-item [routerLink]="['/topic/' + topic.id ]" routerLinkActive="active" lines="none">
-        <ion-label>{{ topic.name }}</ion-label>
-      </ion-item>
-
-      <!-- <ion-item-options side="end">
+          <!-- <ion-item-options side="end">
         <ion-item-option (click)="delete(topic)" color="danger">
           <ion-icon slot="icon-only" name="trash"></ion-icon>
         </ion-item-option>
       </ion-item-options> -->
-    </ion-item-sliding>
-    <ion-item-sliding *ngFor="let topic of TopicWriteinvite">
-      <ion-item [routerLink]="['/topic/' + topic.id ]" routerLinkActive="active" lines="none">
-        <ion-label>{{ topic.name }}</ion-label>
-      </ion-item>
+        </ion-item-sliding>
+        <ion-item-sliding *ngFor="let topic of TopicWriteinvite">
+          <ion-item
+            [routerLink]="['/topic/' + topic.id]"
+            routerLinkActive="active"
+            lines="none"
+          >
+            <ion-label>{{ topic.name }}</ion-label>
+          </ion-item>
 
-      <ion-item-options side="end">
-        <ion-item-option (click)="delete(topic)" color="danger">
-          <ion-icon slot="icon-only" name="trash"></ion-icon>
-        </ion-item-option>
-        <ion-item-option (click)="update(topic)" color="primary">
-          <ion-icon slot="icon-only" name="create-outline"></ion-icon>
-        </ion-item-option>
-      </ion-item-options>
-    </ion-item-sliding>
-  </ion-list>
-  <ion-fab horizontal="end" vertical="bottom" slot="fixed">
-    <ion-fab-button (click)="openCreateTopicModal()">
-      <ion-icon name="add"></ion-icon>
-    </ion-fab-button>
-  </ion-fab>
-</ion-content>
+          <ion-item-options side="end">
+            <ion-item-option (click)="delete(topic)" color="danger">
+              <ion-icon slot="icon-only" name="trash"></ion-icon>
+            </ion-item-option>
+            <ion-item-option (click)="update(topic)" color="primary">
+              <ion-icon slot="icon-only" name="create-outline"></ion-icon>
+            </ion-item-option>
+          </ion-item-options>
+        </ion-item-sliding>
+      </ion-list>
+      <ion-fab horizontal="end" vertical="bottom" slot="fixed">
+        <ion-fab-button (click)="openCreateTopicModal()">
+          <ion-icon name="add"></ion-icon>
+        </ion-fab-button>
+      </ion-fab>
+    </ion-content>
   `,
-  styles: [`
-  #container {
-  text-align: center;
+  styles: [
+    `
+      ion-item::part(native) {
+        border-color: #0c437b;
+        border-width: 0px 0px 2px 0px;
+      }
+      #container {
+        text-align: center;
 
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
-}
-.mt-5{
-  margin-top:2rem;
-}
-#container strong {
-  font-size: 20px;
-  line-height: 26px;
-}
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 50%;
+        transform: translateY(-50%);
+      }
+      .mt-5 {
+        margin-top: 2rem;
+      }
+      #container strong {
+        font-size: 20px;
+        line-height: 26px;
+      }
 
-#container p {
-  font-size: 16px;
-  line-height: 22px;
+      #container p {
+        font-size: 16px;
+        line-height: 22px;
 
-  color: #8c8c8c;
+        color: #8c8c8c;
 
-  margin: 0;
-}
+        margin: 0;
+      }
 
-#container a {
-  text-decoration: none;
-}
-.small-badge{
-  position: absolute;
-    top: 0px;
-    left: 10px;
-    font-size: 10px;
-}
+      #container a {
+        text-decoration: none;
+      }
+      .small-badge {
+        position: absolute;
+        top: 0px;
+        left: 10px;
+        font-size: 10px;
+      }
 
-.notification-readed{
-  font-size:16px;
-  font-weight:bold;
-}
+      .notification-readed {
+        font-size: 16px;
+        font-weight: bold;
+      }
 
-.notification-no-readed{
-  font-size:16px;
-  font-weight:bold;
-}
-ion-item::part(native) {
-  /* background: #19422d;
-  color: #fff; */
-}
-.avatar-upload .avatar-preview {
-    margin: 0 auto;
-    width: 150px;
-    height: 150px;
-    position: relative;
-    border-radius: 100%;
-    border: 6px solid #F8F8F8;
-    box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.1);
-}
-
-.avatar-upload .avatar-preview>div {
-    width: 100%;
-    height: 100%;
-    border-radius: 100%;
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-position: center;
-}
-
-ion-item::part(detail-icon) {
-  color: white;
-  opacity: 1;
-  font-size: 20px;
-}
-  `],
+      .notification-no-readed {
+        font-size: 16px;
+        font-weight: bold;
+      }
+    `,
+  ],
 })
 export class TopicPage implements OnInit {
   // @ViewChild('modalNotif', { static: true }) modalNotif!: IonModal;
@@ -219,11 +211,11 @@ export class TopicPage implements OnInit {
   topics$!: Observable<Topic[]>;
   topicsInvited$!: Observable<Topic[]>;
   notifications$!: Observable<Notif[]>;
-  text$:BehaviorSubject<string>=new BehaviorSubject('');
-  TopicReadinvite:Topic[]=[];
-  TopicWriteinvite:Topic[]=[];
-  numberNotifications:number=0;
-  profileImg:string="";
+  text$: BehaviorSubject<string> = new BehaviorSubject('');
+  TopicReadinvite: Topic[] = [];
+  TopicWriteinvite: Topic[] = [];
+  numberNotifications: number = 0;
+  profileImg: string = '';
   private topicService = inject(TopicService);
   private authService = inject(AuthService);
   private toastController = inject(ToastController);
@@ -233,100 +225,126 @@ export class TopicPage implements OnInit {
    * Fetch all the topic during the ngOnInit hook
    */
   ngOnInit(): void {
-    this.topics$ = this.topicService.getAll().pipe(
-      switchMap(topics=>this.text$.pipe(
-        map(text=>topics.filter((t:Topic)=>t.name.toLocaleUpperCase().includes(text.toLocaleUpperCase())))
-      ))
-    );
+    this.topics$ = this.topicService
+      .getAll()
+      .pipe(
+        switchMap((topics) =>
+          this.text$.pipe(
+            map((text) =>
+              topics.filter((t: Topic) =>
+                t.name.toLocaleUpperCase().includes(text.toLocaleUpperCase())
+              )
+            )
+          )
+        )
+      );
     //this.topicsInvited$ = this.topicService.getTopicsForInvited();
-    this.topicService.getTopicsForReadInvited().subscribe(data=>{
-      this.TopicReadinvite=[];
-      data.forEach(item=>{
-        this.topicService.getInvitation(item.id).subscribe(res=>{
-          res.forEach(inv=>{
-            if(inv.userId == this.authService.getAuth()?.uid && inv.accepted == true){
+    this.topicService.getTopicsForReadInvited().subscribe((data) => {
+      this.TopicReadinvite = [];
+      data.forEach((item) => {
+        this.topicService.getInvitation(item.id).subscribe((res) => {
+          res.forEach((inv) => {
+            if (
+              inv.userId == this.authService.getAuth()?.uid &&
+              inv.accepted == true
+            ) {
               let i = this.TopicReadinvite.indexOf(item);
-              if(i == -1){
+              if (i == -1) {
                 this.TopicReadinvite.push(item);
               }
-
             }
-          })
+          });
         });
-      })
+      });
     });
-    this.topicService.getTopicsForWriteInvited().subscribe(data=>{
-      this.TopicWriteinvite=[];
-      data.forEach(item=>{
-        this.topicService.getInvitation(item.id).subscribe(res=>{
-          res.forEach(inv=>{
-            if(inv.userId == this.authService.getAuth()?.uid && inv.accepted == true){
+    this.topicService.getTopicsForWriteInvited().subscribe((data) => {
+      this.TopicWriteinvite = [];
+      data.forEach((item) => {
+        this.topicService.getInvitation(item.id).subscribe((res) => {
+          res.forEach((inv) => {
+            if (
+              inv.userId == this.authService.getAuth()?.uid &&
+              inv.accepted == true
+            ) {
               let i = this.TopicWriteinvite.indexOf(item);
-              if(i == -1){
+              if (i == -1) {
                 this.TopicWriteinvite.push(item);
               }
-
             }
-          })
+          });
         });
-      })
+      });
     });
-    this.authService.user$.subscribe(user => {
-      if(user.uid){
-        this.profileImg= user.profileLink;
+    this.authService.user$.subscribe((user) => {
+      if (user.uid) {
+        this.profileImg = user.profileLink;
         console.log(this.profileImg);
-        this.notifications$= this.topicService.getNotificationForUser(user.uid);
+        this.notifications$ = this.topicService.getNotificationForUser(
+          user.uid
+        );
 
-        this.notifications$.subscribe(notifications=>{
-          this.numberNotifications=0;
-          notifications.forEach(notification=>{
-            if(!notification.readed){
+        this.notifications$.subscribe((notifications) => {
+          this.numberNotifications = 0;
+          notifications.forEach((notification) => {
+            if (!notification.readed) {
               this.numberNotifications++;
             }
-          })
-        })
-        // this.presentingElement = document.querySelector('.ion-page');
+          });
+        });
       }
     });
-
   }
 
-  jointGroup(notificationId:string,invitationId:string){
+  jointGroup(notificationId: string, invitationId: string) {
     this.topicService.acceptInvitation(invitationId);
     this.topicService.deleteNotification(notificationId);
   }
 
-  markReadOnNotification(notificationId:string){
+  markReadOnNotification(notificationId: string) {
     this.topicService.markReadOnNotification(notificationId);
   }
 
-  async openNotification(notification:Notif){
+  async openNotification(notification: Notif) {
     const modal = await this.modalCtrl.create({
       component: ConfirmInvitationComponent,
       componentProps: {
         notification: notification,
-      }
+      },
     });
     modal.present();
 
     const { data, role } = await modal.onWillDismiss();
     if (role === 'confirmed') {
-      this.jointGroup(notification.id!,notification.invitationId);
-    }else if(role === 'canceled'){
+      this.jointGroup(notification.id!, notification.invitationId);
+    } else if (role === 'canceled') {
       this.markReadOnNotification(notification.id!);
     }
   }
 
-  test(event:any){
-    this.text$.next(event.value.toString())
+  test(event: any) {
+    this.text$.next(event.value.toString());
   }
 
-  logout(){
+  logout() {
     this.authService.SignOut();
   }
 
-  updateProfile(){
-    console.log(this.authService.getAuth());
+  async updateProfile() {
+    let _user = this.authService.getUser();
+    const modal = await this.modalCtrl.create({
+      component: UpdateProfileComponent,
+      componentProps: {
+        user: _user,
+      },
+    });
+    modal.present();
+
+    const { data, role } = await modal.onWillDismiss();
+    if (role === 'confirmed') {
+      _user.profileLink = data.profileLink;
+      _user.username = data.username;
+      this.topicService.updateUser(_user);
+    }
   }
   /**
    * Method made to delete the given {Topic} and fetch the new list
@@ -337,43 +355,42 @@ export class TopicPage implements OnInit {
     this.topicService.delete(topic);
   }
 
-  async update(topic: Topic){
-    let canRename=false;
-    topic.invitesWrite.forEach(item=>{
-      if(item == this.authService.getAuth()?.email){
-        canRename=true;
+  async update(topic: Topic) {
+    let canRename = false;
+    topic.invitesWrite.forEach((item) => {
+      if (item == this.authService.getAuth()?.email) {
+        canRename = true;
       }
-    })
-    if(topic.creator == this.authService.getAuth()?.uid){
+    });
+    if (topic.creator == this.authService.getAuth()?.uid) {
       const modal = await this.modalCtrl.create({
         component: CreateTopicComponent,
         componentProps: {
-          creator:true,
+          creator: true,
           topic: topic,
-        }
+        },
       });
       modal.present();
-      console.log('test!!');
+
       const { data, role } = await modal.onWillDismiss();
 
       if (role === 'confirmed') {
         this._updateTopic(data);
       }
-    }
-    else if(canRename){
-        const modal = await this.modalCtrl.create({
-          component: CreateTopicComponent,
-          componentProps: {
-            creator:false,
-            topic: topic,
-          }
-        });
-        modal.present();
+    } else if (canRename) {
+      const modal = await this.modalCtrl.create({
+        component: CreateTopicComponent,
+        componentProps: {
+          creator: false,
+          topic: topic,
+        },
+      });
+      modal.present();
 
-        const { data, role } = await modal.onWillDismiss();
-        if (role === 'confirmed') {
-          this._renameTopic(data);
-        }
+      const { data, role } = await modal.onWillDismiss();
+      if (role === 'confirmed') {
+        this._renameTopic(data);
+      }
     }
   }
 
@@ -397,7 +414,6 @@ export class TopicPage implements OnInit {
     }
   }
 
-
   /**
    * @private method to create a new {Topic}
    *
@@ -411,7 +427,7 @@ export class TopicPage implements OnInit {
         message: `Topic ${topic.name} successfully created`,
         duration: 1500,
         position: 'bottom',
-        color: 'success'
+        color: 'success',
       });
 
       await toast.present();
@@ -420,7 +436,7 @@ export class TopicPage implements OnInit {
         message: `Failed creating Topic ${topic.name}`,
         duration: 1500,
         position: 'bottom',
-        color: 'danger'
+        color: 'danger',
       });
 
       await toast.present();
@@ -435,7 +451,7 @@ export class TopicPage implements OnInit {
         message: `Topic ${topic.name} successfully updated`,
         duration: 1500,
         position: 'bottom',
-        color: 'success'
+        color: 'success',
       });
 
       await toast.present();
@@ -444,7 +460,7 @@ export class TopicPage implements OnInit {
         message: `Failed updating Topic ${topic.name}`,
         duration: 1500,
         position: 'bottom',
-        color: 'danger'
+        color: 'danger',
       });
 
       await toast.present();
@@ -459,7 +475,7 @@ export class TopicPage implements OnInit {
         message: `Topic ${topic.name} successfully renamed`,
         duration: 1500,
         position: 'bottom',
-        color: 'success'
+        color: 'success',
       });
 
       await toast.present();
@@ -468,11 +484,10 @@ export class TopicPage implements OnInit {
         message: `Failed renaming Topic ${topic.name}`,
         duration: 1500,
         position: 'bottom',
-        color: 'danger'
+        color: 'danger',
       });
 
       await toast.present();
     }
   }
-
 }

@@ -13,11 +13,11 @@ import { Post } from 'src/app/models/post';
   <ion-header translucent>
     <ion-toolbar>
       <ion-buttons slot="start">
-        <ion-button fill="clear" color="primary" (click)="dismissModal(null, 'canceled')">Close</ion-button>
+        <ion-button fill="clear" (click)="dismissModal(null, 'canceled')">Close</ion-button>
       </ion-buttons>
       <ion-title>Modal Content</ion-title>
       <ion-buttons slot="end">
-        <ion-button fill="clear" color="primary" [disabled]="createPostForm.invalid" type="submit">
+        <ion-button fill="clear" [disabled]="createPostForm.invalid" type="submit">
           <ion-icon name="checkmark-outline"></ion-icon>
         </ion-button>
       </ion-buttons>
