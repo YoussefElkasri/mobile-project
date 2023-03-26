@@ -236,13 +236,11 @@ export class TopicService {
 // Get a reference to the document that you want to update
     let docRef= this.getUserByEmail(email);
     (await this.getUserByEmail(email)).forEach((document) => {
-        //const docRef = doc(this.firestore, "users", document.id);
         const collectionRef = collection(this.firestore,`invitations`) as CollectionReference<Invitation>;
         const docInvitationRef = addDoc(collectionRef, {userId:document.id,topicId:topicId,accepted:false});
-        //updateDoc(docRef , {invitation:{topicId:topicId, topicName:topicName, accepted:false}});
        let notification!: Notif;
         docInvitationRef.then(invitation=>{
-          notification={title:"new demande",description:"you have received a new demande to joint a group of discusion !",readed:false,userId:document.id, topicName:topicName, invitationId:invitation.id};
+          notification={title:"New Invitation",description:"You have received a new invitation to join a discussion group !",readed:false,userId:document.id, topicName:topicName, invitationId:invitation.id};
           this.sendNotification(notification);
         })
 

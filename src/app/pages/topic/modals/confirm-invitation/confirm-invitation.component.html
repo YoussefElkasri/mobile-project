@@ -1,34 +1,15 @@
-<div>testt</div>
-<!-- <ng-template>
-    <ion-header>
-        <ion-toolbar>
-            <ion-title>Modal</ion-title>
-            <ion-buttons slot="end">
-                <ion-button (click)="close()">Close</ion-button>
-            </ion-buttons>
-        </ion-toolbar>
-    </ion-header>
-    <ion-content class="ion-padding">
-        <p>You have received a demande to joint a group of discusion ({{notification.topicName}})</p>
-        <div>
-            <ion-button (click)="accept()">Yes</ion-button>
-            <ion-button (click)="close()">No</ion-button>
-        </div>
-    </ion-content>
-</ng-template> -->
-
 <ion-header translucent>
     <ion-toolbar>
         <ion-buttons slot="start">
             <ion-button fill="clear"  (click)="close()">Close</ion-button>
         </ion-buttons>
-        <ion-title>Modal Content</ion-title>
+        <ion-title>Groupe invitation</ion-title>
     </ion-toolbar>
 </ion-header>
 <ion-content fullscreen>
-    <p>You have received a demande to joint a group of discusion ({{notification.topicName}})</p>
+    <p>You have received an invitation to join this group: {{notification.topicName}}</p>
     <div>
-        <ion-button (click)="accept()">Yes</ion-button>
-        <ion-button (click)="close()">No</ion-button>
+        <ion-button expand="block" shape="round" (click)="accept()">Accept</ion-button>
+        <ion-button expand="block" shape="round" (click)="close()">Decline</ion-button>
     </div>
 </ion-content>
