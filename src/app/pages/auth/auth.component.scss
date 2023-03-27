@@ -69,3 +69,16 @@ ion-content {
   }
 }
 
+ion-header,
+ion-toolbar {
+  --ion-background-color: linear-gradient(#203887, #0c437b);
+  color: white !important;
+}
+
+.white {
+  --ion-background-color: white;
+  color: white !important;
+
+
+
+}

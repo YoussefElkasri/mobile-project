@@ -43,7 +43,7 @@
         </ion-text>
 
         <ion-item lines="none">
-            <ion-button color="light" slot="end" fill="clear">Forgot your password?</ion-button>
+            <ion-button color="light" slot="end" fill="clear" (click)="openModal()">Forgot your password?</ion-button>
         </ion-item>
 
         <ion-button color="light" expand="block" shape="round" [disabled]="authForm.invalid" type="submit" fill="outline">Log In</ion-button>
@@ -68,5 +68,54 @@
                 Github
             </ion-button>
         </div>
+
+
+        <ion-modal #modal isOpen={{isOpen}} [initialBreakpoint]="1" (willDismiss)="isOpen=false" >
+          <ng-template>
+            <ion-header>
+              <ion-toolbar>
+                <ion-title>
+                Reset password
+              </ion-title>
+              </ion-toolbar>
+
+            </ion-header>
+            <ion-content class="white">
+              <form [formGroup]="registerForm" (ngSubmit)="accept()" novalidate autocomplete="off">
+
+                <br>
+                <br>
+                <ion-text>
+                  <span>
+                    Enter your email to receive a link to reset your password.
+                  </span>
+                </ion-text>
+
+                <br>
+                <br>
+
+                <ion-item lines="full">
+                  <ion-label clolor="primary" position="floating">Email</ion-label>
+                  <ion-input clolor="primary" type="text" name="email" formControlName="email" autocomplete="off"></ion-input>
+                </ion-item>
+                <ion-text color="danger" *ngIf="controls['email'].touched && controls['email'].errors?.['required']">
+                  <span>
+                    This field is required
+                  </span>
+                </ion-text>
+
+                <br>
+                <br>
+
+
+                <ion-button color="primary" expand="block" shape="round" [disabled]="registerForm.invalid" type="submit" fill="outline">Send</ion-button>
+
+                <br>
+
+                <ion-button color="tertiary" expand="block" shape="round" (click)="goBack()">Cancel</ion-button>
+             </form>
+            </ion-content>
+          </ng-template>
+        </ion-modal>
     </ion-content>
 </form>

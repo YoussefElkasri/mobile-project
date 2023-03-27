@@ -1,8 +1,8 @@
 import { CommonModule, NgFor } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
-import { IonicModule } from '@ionic/angular';
+import { IonicModule, ToastController } from '@ionic/angular';
 import { CreateTopicComponent } from '../topic/modals/create-topic/create-topic.component';
 import { AuthService } from 'src/app/services/auth.service';
 import { User } from '../../models/user';
@@ -17,6 +17,8 @@ import { uploadBytes, Storage, ref, getDownloadURL } from '@angular/fire/storage
   imports: [ReactiveFormsModule, IonicModule, RouterModule, CreateTopicComponent, NgFor,CommonModule],
 })
 export class RegisterComponent implements OnInit {
+
+  private toastController = inject(ToastController);
 
   profilePicturLink: string | null = null;
 
@@ -66,17 +68,35 @@ export class RegisterComponent implements OnInit {
       emailVerified: false,
     }
 
-    console.log(user);
-
     this.authService.createUserAuth(user)
     .then( (autUser) =>{
       user.uid = autUser.user.uid;
       this.authService.addUser(user);
       this.router.navigate(['login']);
+      async () => {
+        const toast = await this.toastController.create({
+          message: `Account create with succes`,
+          duration: 1500,
+          position: 'bottom',
+          color: 'succes'
+        });
+
+        await toast.present();
+      }
     }
     )
     .catch(error => {
       console.log(error);
+      async () => {
+        const toast = await this.toastController.create({
+          message: `An error occure`,
+          duration: 1500,
+          position: 'bottom',
+          color: 'danger'
+        });
+
+        await toast.present();
+      }
       this.registerPassError = true;
     });
   }

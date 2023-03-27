@@ -16,14 +16,21 @@ import { AuthService } from 'src/app/services/auth.service';
 })
 export class AuthComponent implements OnInit {
 
+  isOpen = false;
+
   private toastController = inject(ToastController);
 
   identifiantPassError:boolean = false
   authForm!: FormGroup;
+  registerForm!: FormGroup;
   constructor(private formBuilder: FormBuilder, private authService: AuthService, private router: Router) {
     this.authForm = this.formBuilder.group({
       email: ['', [Validators.required, Validators.minLength(5)]],
       password: ['', [Validators.required, Validators.minLength(6)]],
+    });
+
+    this.registerForm = this.formBuilder.group({
+      email: ['', [Validators.required, Validators.pattern("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,4}$")]]
     });
   }
 
@@ -113,6 +120,43 @@ export class AuthComponent implements OnInit {
 
       await toast.present();
     }
+  }
+
+  accept() {
+    this.authService.resetPassword(this.registerForm.value.email).
+    then(
+      async () => {
+        const toast = await this.toastController.create({
+          message: `E-mail Sent`,
+          duration: 1500,
+          position: 'bottom',
+          color: 'succes'
+        });
+
+        await toast.present();
+        this.isOpen=false;
+      }
+    )
+    .catch(
+      async () => {
+        const toast = await this.toastController.create({
+          message: `This email is not registered with us`,
+          duration: 1500,
+          position: 'bottom',
+          color: 'danger'
+        });
+
+        await toast.present();
+      }
+    )
+  }
+
+  goBack() {
+    this.isOpen = false;
+  }
+
+  openModal() {
+    this.isOpen = true;
   }
 
 }
