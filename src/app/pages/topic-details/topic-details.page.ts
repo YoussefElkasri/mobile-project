@@ -218,9 +218,21 @@ export class TopicDetailsPage implements OnInit {
 
       alreadyInvit.forEach(async element=>{
         (await this.topicService.getUserByEmail(element)).forEach(document => {
-          this.userInTopic.push(document.data());
-      })
-    });
+          if(this.userInTopic.length > 0){
+            this.userInTopic.forEach(userTopic=>{
+              if(userTopic.email != document.data().email){
+                this.userInTopic.push(document.data());
+              }
+            });
+          }else{
+            this.userInTopic.push(document.data());
+          }
+
+
+
+
+        })
+      });
 
       this.topicService.getAllUsers().subscribe((data_user) => {
         this.users = data_user;
