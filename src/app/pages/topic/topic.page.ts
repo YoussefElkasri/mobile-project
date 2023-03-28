@@ -25,7 +25,7 @@ import { User } from '@capacitor-firebase/authentication/dist/esm/definitions';
   ],
   template: `
     <ion-header [translucent]="true">
-      <ion-toolbar>
+      <ion-toolbar style="background:linear-gradient(#203887, #0c437b);">
         <ion-title> Topics </ion-title>
         <ion-buttons slot="primary">
           <ion-button id="auto-trigger">
@@ -141,6 +141,11 @@ import { User } from '@capacitor-firebase/authentication/dist/esm/definitions';
   `,
   styles: [
     `
+    ion-header,
+ion-toolbar {
+    --ion-background: linear-gradient(#203887, #0c437b) !important;
+    color: white !important;
+}
       ion-item::part(native) {
         border-color: #0c437b;
         border-width: 0px 0px 2px 0px;

@@ -20,7 +20,7 @@ import { Invite } from 'src/app/models/invite';
   template: `
   <ng-container *ngIf="topic$ | async as topic$">
     <ion-header>
-      <ion-toolbar>
+      <ion-toolbar style="background-color:linear-gradient(#203887, #0c437b);">
         <ion-buttons slot="start">
           <ion-button fill="clear" [routerLink]="['/']">
             <ion-icon name="arrow-back-outline"></ion-icon>
