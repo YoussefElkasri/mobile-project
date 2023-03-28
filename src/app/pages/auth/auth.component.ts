@@ -73,54 +73,54 @@ export class AuthComponent implements OnInit {
 
   }
 
-  async signInWithGoogle(){
-    try {
-      await this.authService.signInWithGoogle();
-    } catch (_error: any) {
-      console.log(_error);
-      const toast = await this.toastController.create({
-        message: `Failed to signIn with google`,
-        duration: 1500,
-        position: 'bottom',
-        color: 'danger'
-      });
+  // async signInWithGoogle(){
+  //   try {
+  //     await this.authService.signInWithGoogle();
+  //   } catch (_error: any) {
+  //     console.log(_error);
+  //     const toast = await this.toastController.create({
+  //       message: `Failed to signIn with google`,
+  //       duration: 1500,
+  //       position: 'bottom',
+  //       color: 'danger'
+  //     });
 
-      await toast.present();
-    }
+  //     await toast.present();
+  //   }
 
-  }
+  // }
 
-  async signInWithFacebook(){
-    try {
-      await this.authService.signInWithFacebook();
-    } catch (_error: any) {
-      console.log(_error);
-      const toast = await this.toastController.create({
-        message: `Failed to signIn with facebook`,
-        duration: 1500,
-        position: 'bottom',
-        color: 'danger'
-      });
+  // async signInWithFacebook(){
+  //   try {
+  //     await this.authService.signInWithFacebook();
+  //   } catch (_error: any) {
+  //     console.log(_error);
+  //     const toast = await this.toastController.create({
+  //       message: `Failed to signIn with facebook`,
+  //       duration: 1500,
+  //       position: 'bottom',
+  //       color: 'danger'
+  //     });
 
-      await toast.present();
-    }
-  }
+  //     await toast.present();
+  //   }
+  // }
 
-  async signInWithGithub(){
-    try {
-      await this.authService.signInWithGithub();
-    } catch (_error: any) {
-      console.log(_error);
-      const toast = await this.toastController.create({
-        message: `Failed to signIn with Github`,
-        duration: 1500,
-        position: 'bottom',
-        color: 'danger'
-      });
+  // async signInWithGithub(){
+  //   try {
+  //     await this.authService.signInWithGithub();
+  //   } catch (_error: any) {
+  //     console.log(_error);
+  //     const toast = await this.toastController.create({
+  //       message: `Failed to signIn with Github`,
+  //       duration: 1500,
+  //       position: 'bottom',
+  //       color: 'danger'
+  //     });
 
-      await toast.present();
-    }
-  }
+  //     await toast.present();
+  //   }
+  // }
 
   accept() {
     this.authService.resetPassword(this.registerForm.value.email).

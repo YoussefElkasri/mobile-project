@@ -6,10 +6,10 @@ const config: CapacitorConfig = {
   webDir: 'www',
   bundledWebRuntime: false,
   plugins: {
-    FirebaseAuthentication: {
-      skipNativeAuth: false,
-      providers: [ "google.com","twitter.com", "phone","facebook.com"],
-    },
+    // FirebaseAuthentication: {
+    //   skipNativeAuth: false,
+    //   providers: [ "google.com","twitter.com", "phone","facebook.com"],
+    // },
   }
 };
 
