@@ -8,7 +8,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 
 import { User } from '../models/user';
 import { ActivatedRouteSnapshot, CanActivate, Router, RouterStateSnapshot } from '@angular/router';
-// import { FirebaseAuthentication } from '@capacitor-firebase/authentication';
+import { FirebaseAuthentication } from '@capacitor-firebase/authentication';
 import { VerificationEmailService } from './verificationEmail.service';
 
 
@@ -61,9 +61,9 @@ export class AuthService {
   // Sign out
   SignOut() {
     return this.auth.signOut().then(async () => {
-      // await FirebaseAuthentication.signOut();
-      //localStorage.removeItem('user');
-      // this.signOutWithFacebook();
+      await FirebaseAuthentication.signOut();
+      localStorage.removeItem('user');
+      this.signOutWithFacebook();
       this.router.navigate(['/login']);
     });
   }
@@ -111,14 +111,14 @@ export class AuthService {
   }
 
   async signInWithGoogle(){
-    // const result = await FirebaseAuthentication.signInWithGoogle();
-    // const credential = GoogleAuthProvider.credential(result.credential?.idToken);
-    // await signInWithCredential(getAuth(), credential);
-    // //USER.value = getAuth().currentUser;
-    // if(getAuth().currentUser){
-    //   await this.addGoogleUser(getAuth().currentUser);
-    //   this.SetUserData(getAuth().currentUser);
-    // }
+    const result = await FirebaseAuthentication.signInWithGoogle();
+    const credential = GoogleAuthProvider.credential(result.credential?.idToken);
+    await signInWithCredential(getAuth(), credential);
+    //USER.value = getAuth().currentUser;
+    if(getAuth().currentUser){
+      await this.addGoogleUser(getAuth().currentUser);
+      this.SetUserData(getAuth().currentUser);
+    }
     this.router.navigate(['topic']);
     return getAuth().currentUser;
   }
@@ -144,15 +144,15 @@ export class AuthService {
   }
   acessToken:any;
   async signInWithFacebook(){
-    // const result = await FirebaseAuthentication.signInWithFacebook();
-    // this.acessToken = FacebookAuthProvider.credential(result.credential?.accessToken!);
-    // const credential = FacebookAuthProvider.credential(result.credential?.accessToken!);
-    // await signInWithCredential(getAuth(), credential);
-    // //USER.value = getAuth().currentUser;
-    // if(getAuth().currentUser){
-    //   await this.addGoogleUser(getAuth().currentUser);
-    //   this.SetUserData(getAuth().currentUser);
-    // }
+    const result = await FirebaseAuthentication.signInWithFacebook();
+    this.acessToken = FacebookAuthProvider.credential(result.credential?.accessToken!);
+    const credential = FacebookAuthProvider.credential(result.credential?.accessToken!);
+    await signInWithCredential(getAuth(), credential);
+    //USER.value = getAuth().currentUser;
+    if(getAuth().currentUser){
+      await this.addGoogleUser(getAuth().currentUser);
+      this.SetUserData(getAuth().currentUser);
+    }
     this.router.navigate(['topic']);
     return getAuth().currentUser;
   }
@@ -168,15 +168,15 @@ export class AuthService {
   }
 
   async signInWithGithub(){
-    // await FirebaseAuthentication.signOut();
-    // const result = await FirebaseAuthentication.signInWithGithub();
-    // const credential = GithubAuthProvider.credential(result.credential?.accessToken!);
-    // await signInWithCredential(getAuth(), credential);
-    // //USER.value = getAuth().currentUser;
-    // if(getAuth().currentUser){
-    //   await this.addGithubUser(getAuth().currentUser);
-    //   this.SetUserData(getAuth().currentUser);
-    // }
+    await FirebaseAuthentication.signOut();
+    const result = await FirebaseAuthentication.signInWithGithub();
+    const credential = GithubAuthProvider.credential(result.credential?.accessToken!);
+    await signInWithCredential(getAuth(), credential);
+    //USER.value = getAuth().currentUser;
+    if(getAuth().currentUser){
+      await this.addGithubUser(getAuth().currentUser);
+      this.SetUserData(getAuth().currentUser);
+    }
     this.router.navigate(['topic']);
     return getAuth().currentUser;
   }

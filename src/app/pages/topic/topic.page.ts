@@ -11,7 +11,7 @@ import { CommonModule } from '@angular/common';
 import { AuthService } from 'src/app/services/auth.service';
 import { Notif } from 'src/app/models/notification';
 import { ConfirmInvitationComponent } from './modals/confirm-invitation/confirm-invitation.component';
-// import { User } from '@capacitor-firebase/authentication/dist/esm/definitions';
+import { User } from '@capacitor-firebase/authentication/dist/esm/definitions';
 
 @Component({
   selector: 'app-home',
@@ -216,7 +216,7 @@ export class TopicPage implements OnInit {
   TopicWriteinvite: Topic[] = [];
   numberNotifications: number = 0;
   profileImg: string = '';
-  // user!:User;
+  user!:User;
   subscribeUser: any;
   private topicService = inject(TopicService);
   private authService = inject(AuthService);
