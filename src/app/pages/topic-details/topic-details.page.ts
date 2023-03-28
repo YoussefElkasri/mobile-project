@@ -23,7 +23,7 @@ import { UserDetailComponent } from './modals/user-detail/user-detail.component'
   <ion-menu contentId="main-content">
   <ion-header>
     <ion-toolbar>
-      <ion-title>Menu Content</ion-title>
+      <ion-title>Utilisateurs</ion-title>
     </ion-toolbar>
   </ion-header>
   <ion-content [fullscreen]="true" class="ion-padding">
@@ -198,6 +198,7 @@ export class TopicDetailsPage implements OnInit {
   /**
    * Fetch all the current topic according to the topicId during the ngOnInit hook
    */
+
   ngOnInit(): void {
     this.topicId = this.route.snapshot.params['topicId'];
     this.topic$ = this.topicService.findOne(this.topicId as string);
@@ -207,7 +208,7 @@ export class TopicDetailsPage implements OnInit {
     this.topic$.subscribe(data=>{
       this.topic=data as Topic;
     })
-    this.topicService.findOne(this.topicId as string).subscribe((data) => {
+    this.topicService.findOne(this.topicId as string).subscribe(async (data) => {
       data.invitesWrite.forEach((element: string) => {
         alreadyInvit.push(element);
       });
@@ -216,14 +217,25 @@ export class TopicDetailsPage implements OnInit {
         alreadyInvit.push(element);
       });
 
+      let userCreator = (await this.topicService.getUserById(data.creator));
+      this.userInTopic=[];
+      this.userInTopic.push(userCreator);
       alreadyInvit.forEach(async element=>{
         (await this.topicService.getUserByEmail(element)).forEach(document => {
+          // let i = this.userInTopic.indexOf(document.data());
+          // if(i == -1){
+          //   this.userInTopic.push(document.data());
+          // }
+          let exist=false;
           if(this.userInTopic.length > 0){
             this.userInTopic.forEach(userTopic=>{
-              if(userTopic.email != document.data().email){
-                this.userInTopic.push(document.data());
+              if(userTopic.email == document.data().email){
+                exist=true;
               }
             });
+            if(exist == false){
+              this.userInTopic.push(document.data());
+            }
           }else{
             this.userInTopic.push(document.data());
           }
