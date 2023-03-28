@@ -47,6 +47,10 @@ export class UserDetailComponent implements OnInit {
       if(this.authService.getUser().uid == this.topic.creator){
         this.canUpdateRight=true;
       }
+
+      if(this.authService.getUser().email == this.user.email){
+        this.canUpdateRight=false;
+      }
       // this.registerForm.get('username')?.setValue(this.user.username);
 
     }

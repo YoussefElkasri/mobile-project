@@ -62,8 +62,8 @@ export class AuthService {
   SignOut() {
     return this.auth.signOut().then(async () => {
       await FirebaseAuthentication.signOut();
-      //localStorage.removeItem('user');
-      // this.signOutWithFacebook();
+      localStorage.removeItem('user');
+      this.signOutWithFacebook();
       this.router.navigate(['/login']);
     });
   }

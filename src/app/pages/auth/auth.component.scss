@@ -63,7 +63,7 @@
 }
 
 ion-content {
-  --ion-background-color: linear-gradient(#203887, #0c437b);
+  --ion-background-color: #0c437b;
   ion-item {
     --ion-background-color: transparent;//rgb(3, 8, 101);
   }
@@ -71,7 +71,7 @@ ion-content {
 
 ion-header,
 ion-toolbar {
-  --ion-background-color: linear-gradient(#203887, #0c437b);
+  --ion-background-color: #0c437b;
   color: white !important;
 }
 
