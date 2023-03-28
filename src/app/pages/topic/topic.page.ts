@@ -338,7 +338,31 @@ export class TopicPage implements OnInit {
     if (role === 'confirmed') {
       _user.profileLink = data.profileLink;
       _user.username = data.username;
-      this.topicService.updateUser(_user);
+      this._updateProfile(_user);
+    }
+  }
+
+  private async _updateProfile(user: any): Promise<void> {
+    try {
+      this.topicService.updateUser(user);
+
+      const toast = await this.toastController.create({
+        message: `Your account successfully updated`,
+        duration: 1500,
+        position: 'bottom',
+        color: 'success',
+      });
+
+      await toast.present();
+    } catch (e) {
+      const toast = await this.toastController.create({
+        message: `Failed updating profile`,
+        duration: 1500,
+        position: 'bottom',
+        color: 'danger',
+      });
+
+      await toast.present();
     }
   }
   /**
