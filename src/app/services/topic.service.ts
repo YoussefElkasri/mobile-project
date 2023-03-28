@@ -123,7 +123,6 @@ export class TopicService {
   }
 
   async updateTopic(topic : Topic){
-    console.log(topic)
     let topicTmp:Topic={
       id: '',
       name: '',
@@ -150,6 +149,39 @@ export class TopicService {
         this.sendInvitation(invite.email, topic.id, topic.name);
       })
 
+  }
+
+  async updateUserRight(data : any,topic:Topic){
+    let topicTmp:Topic={
+      id: '',
+      name: '',
+      creator: '',
+      invites: [],
+      posts: [],
+      invitesRead: [],
+      invitesWrite: []
+    };
+    const docRef = doc(this.firestore, "topics", topic.id);
+     topicTmp = (await getDoc(docRef)).data() as Topic;
+     let i = topicTmp.invitesRead.indexOf(data.email);
+      let j = topicTmp.invitesWrite.indexOf(data.email);
+      if(i == -1){
+        topicTmp.invitesRead.push(data.email);
+        topicTmp.invitesWrite.splice(j,1);
+      }
+      if(j == -1){
+        topicTmp.invitesWrite.push(data.email);
+        topicTmp.invitesRead.splice(i,1);
+      }
+
+    //  topic.invites.forEach(invite=>{
+    //    if(invite.right == "read"){
+    //      topicTmp.invitesRead.push(invite.email);
+    //    }else if(invite.right == "write"){
+    //      topicTmp.invitesWrite.push(invite.email);
+    //    }
+    //  });
+     updateDoc(docRef, {invitesRead:topicTmp.invitesRead,invitesWrite:topicTmp.invitesWrite})
   }
 
   async renameTopic(topic : Topic){
@@ -263,7 +295,6 @@ export class TopicService {
     //const q = query(collectionRef, where("userId", "==", idUserDoc));
     // const querySnapshot =  getDocs(q);
     // querySnapshot.forEach(document=>{
-    //   console.log(document.data());
     // })
   }
 

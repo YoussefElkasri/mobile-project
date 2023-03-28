@@ -4,7 +4,7 @@ import { CommonModule, NgFor } from '@angular/common';
 import { Component, inject, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { IonicModule, ModalController } from '@ionic/angular';
+import { IonicModule, ModalController, ToastController } from '@ionic/angular';
 import { EMPTY, Observable, map } from 'rxjs';
 import { Post } from 'src/app/models/post';
 import { Topic } from 'src/app/models/topic';
@@ -13,14 +13,28 @@ import { CreatePostComponent } from './modals/create-post/create-post.component'
 import { UsersModalComponent } from '../topic/modals/create-topic/users-modal/users-modal.component';
 import { Item } from 'src/app/models/item';
 import { Invite } from 'src/app/models/invite';
+import { UserDetailComponent } from './modals/user-detail/user-detail.component';
 
 @Component({
   selector: 'app-topic-details',
   standalone: true,
   template: `
   <ng-container *ngIf="topic$ | async as topic$">
+  <ion-menu contentId="main-content">
+  <ion-header>
+    <ion-toolbar>
+      <ion-title>Menu Content</ion-title>
+    </ion-toolbar>
+  </ion-header>
+  <ion-content [fullscreen]="true" class="ion-padding">
+    <ion-list>
+      <ion-item *ngFor="let user of userInTopic" (click)="selectUser(user)"><ion-label>{{user.username}}</ion-label></ion-item>
+    </ion-list>
+  </ion-content>
+</ion-menu>
     <ion-header>
-      <ion-toolbar style="background-color:linear-gradient(#203887, #0c437b);">
+    <!-- style="background-color:linear-gradient(#203887, #0c437b);" -->
+      <ion-toolbar >
         <ion-buttons slot="start">
           <ion-button fill="clear" [routerLink]="['/']">
             <ion-icon name="arrow-back-outline"></ion-icon>
@@ -30,6 +44,9 @@ import { Invite } from 'src/app/models/invite';
         <ion-button (click)="addFriend()" slot="end">
           <ion-icon name="person-add-outline"></ion-icon>
         </ion-button>
+        <ion-menu-button slot="end">
+          <ion-icon name="people-outline"></ion-icon>
+        </ion-menu-button>
       </ion-toolbar>
     </ion-header>
 
@@ -165,12 +182,14 @@ export class TopicDetailsPage implements OnInit {
 
   topicId: string | null = null;
   topic$: Observable<Topic | null> = EMPTY;
-
+  topic!:Topic;
   private topicService = inject(TopicService);
   private modalCtrl = inject(ModalController);
   private route = inject(ActivatedRoute);
   private authService = inject(AuthService);
+  private toastController = inject(ToastController);
 
+  userInTopic:User[]=[];
   user: User | null = null;
   message: string = '';
 
@@ -185,7 +204,9 @@ export class TopicDetailsPage implements OnInit {
     this.user = this.authService.getUser();
 
     let alreadyInvit: string[] = new Array();
-
+    this.topic$.subscribe(data=>{
+      this.topic=data as Topic;
+    })
     this.topicService.findOne(this.topicId as string).subscribe((data) => {
       data.invitesWrite.forEach((element: string) => {
         alreadyInvit.push(element);
@@ -194,6 +215,12 @@ export class TopicDetailsPage implements OnInit {
       data.invitesRead.forEach((element: string) => {
         alreadyInvit.push(element);
       });
+
+      alreadyInvit.forEach(async element=>{
+        (await this.topicService.getUserByEmail(element)).forEach(document => {
+          this.userInTopic.push(document.data());
+      })
+    });
 
       this.topicService.getAllUsers().subscribe((data_user) => {
         this.users = data_user;
@@ -232,6 +259,24 @@ export class TopicDetailsPage implements OnInit {
 
     if (role === 'confirmed') {
       this._addPost(data);
+    }
+  }
+  async selectUser(user:User){
+    const modal = await this.modalCtrl.create({
+      component: UserDetailComponent,
+      componentProps: {
+        user: user,
+        topic : this.topic,
+      },
+    });
+    modal.present();
+
+    const { data, role } = await modal.onWillDismiss();
+    if (role === 'confirmed') {
+      let topic:Topic = this.topic;
+
+      this.updateRightUser(data,this.topic,user);
+      // this.jointGroup(notification.id!, notification.invitationId);
     }
   }
 
@@ -285,6 +330,29 @@ export class TopicDetailsPage implements OnInit {
       //   color: 'danger'
       // });
       // await toast.present();
+    }
+  }
+
+  private async updateRightUser(data: any,topic:Topic,user:User): Promise<void> {
+    try {
+      this.topicService.updateUserRight(data,topic);
+
+      const toast = await this.toastController.create({
+        message: `right of the ${user.username} successfully updated`,
+        duration: 1500,
+        position: 'bottom',
+        color: 'success'
+      });
+
+      await toast.present();
+    } catch (e) {
+      const toast = await this.toastController.create({
+        message: `Failed updating right of ${user.username}`,
+        duration: 1500,
+        position: 'bottom',
+        color: 'danger'
+      });
+      await toast.present();
     }
   }
 
@@ -384,7 +452,6 @@ export class TopicDetailsPage implements OnInit {
 
     this.topicService.getTopic(this.topicId!).then(
       (topic) => {
-        console.log(topic)
         if (topic) {
           this.selectedUsers.forEach((user) => {
             (topic as Topic).invites = new Array();

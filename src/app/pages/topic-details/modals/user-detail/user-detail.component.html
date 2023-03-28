@@ -1,0 +1,30 @@
+<form [formGroup]="rightForm" (ngSubmit)="onSubmit()" novalidate autocomplete="off">
+    <ion-content fullscreen>
+
+        <div class="avatar-upload">
+            <div class="avatar-preview">
+                <div id="imagePreview" style="background-image: url('{{user.profileLink}}');">
+                </div>
+            </div>
+        </div>
+
+        <ion-item lines="full">
+            <ion-label>{{user.username}}</ion-label>
+
+        </ion-item>
+        <ion-item *ngIf="canUpdateRight">
+            <ion-select style="color:white" formControlName="right" placeholder="change right for user">
+                <ion-select-option style="color:white" value="read">Read</ion-select-option>
+                <ion-select-option style="color:white" value="write">Write</ion-select-option>
+            </ion-select>
+        </ion-item>
+        <br><br>
+        <ion-button *ngIf="canUpdateRight" color="light" expand="block" shape="round" type="submit" fill="outline">Update right</ion-button>
+
+        <br>
+
+        <ion-button color="tertiary" expand="block" shape="round" (click)="cancel()">Cancel</ion-button>
+
+
+    </ion-content>
+</form>
