@@ -25,7 +25,7 @@ export class AuthComponent implements OnInit {
   registerForm!: FormGroup;
   constructor(private formBuilder: FormBuilder, private authService: AuthService, private router: Router) {
     this.authForm = this.formBuilder.group({
-      email: ['', [Validators.required, Validators.minLength(5)]],
+      email: ['', [Validators.required, Validators.pattern("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,4}$")]],
       password: ['', [Validators.required, Validators.minLength(6)]],
     });
 

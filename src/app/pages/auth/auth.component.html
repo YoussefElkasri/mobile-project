@@ -36,11 +36,6 @@
                 This field is required
             </span>
         </ion-text>
-        <ion-text color="danger" *ngIf="controls['password'].touched && controls['password'].errors?.['minlength']">
-            <span class="error-text">
-      Minimum length 6
-          </span>
-        </ion-text>
 
         <ion-item lines="none">
             <ion-button color="light" slot="end" fill="clear" (click)="openModal()">Forgot your password?</ion-button>
