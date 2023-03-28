@@ -318,6 +318,11 @@ export class TopicService {
 
   }
 
+  async getUserById(id:string){
+    const docRef= doc(this.firestore, "users", id);
+    return (await getDoc(docRef)).data() as User;
+  }
+
   getInvitation(topicId:string){
     const collectionRef = collection(this.firestore,`invitations`) as CollectionReference<Invitation>;
     return collectionData<Invitation>(query(collectionRef, where("topicId", "==", topicId)));
