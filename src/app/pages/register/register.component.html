@@ -1,0 +1,119 @@
+<form [formGroup]="registerForm" (ngSubmit)="register()" novalidate>
+  <!-- <ion-header translucent>
+    <ion-toolbar>
+      <ion-buttons slot="start">
+        <ion-button fill="clear" color="primary" (click)="goBack()">Close</ion-button>
+      </ion-buttons>
+      <ion-title>Register</ion-title>
+      <ion-buttons slot="end">
+        <ion-button fill="clear" color="primary" [disabled]="registerForm.invalid && passwordMatchError" type="submit">
+          <ion-icon name="checkmark-outline"></ion-icon>
+        </ion-button>
+      </ion-buttons>
+    </ion-toolbar>
+  </ion-header> -->
+
+  <ion-content fullscreen>
+    <!-- <div class="logo">
+      <img *ngIf="profilePicturLink" [src]="profilePicturLink" class="mask"/>
+      <ion-icon *ngIf="!profilePicturLink" name="person-circle-outline">
+      </ion-icon>
+    </div>
+    <ion-button>
+      Change avatar
+      <input type="file" (change)="send($event)" accept=".png, .jpg, .jpeg" style="display: none;" />
+    </ion-button> -->
+
+    <div class="avatar-upload">
+        <div class="avatar-edit">
+            <input type='file' id="imageUpload" accept=".png, .jpg, .jpeg, .html" (change)="loadFile($event)" />
+            <label for="imageUpload"></label>
+        </div>
+        <div class="avatar-preview">
+          <div id="imagePreview" style="background-image: url('https://ionicframework.com/docs/img/demos/avatar.svg');">
+          </div>
+        </div>
+    </div>
+
+    <ion-item lines="full">
+      <ion-label position="floating">Username</ion-label>
+      <ion-input type="text" name="username" formControlName="username"></ion-input>
+    </ion-item>
+    <ion-text color="danger" *ngIf="controls['username'].touched && controls['username'].errors?.['required']">
+      <span>
+        This field is required
+      </span>
+    </ion-text>
+    <ion-text color="danger" *ngIf="controls['username'].touched && controls['username'].errors?.['minlength']">
+      <span>
+        Minimum length 2
+      </span>
+    </ion-text>
+
+    <ion-item lines="full">
+      <ion-label position="floating">Email</ion-label>
+      <ion-input type="text" name="email" formControlName="email"></ion-input>
+    </ion-item>
+
+    <ion-text color="danger" *ngIf="controls['email'].touched && controls['email'].errors?.['required']">
+      <span>
+        This field is required
+      </span>
+    </ion-text>
+    <ion-text color="danger" *ngIf="controls['email'].touched && controls['email'].errors?.['minlength']">
+      <span>
+        Minimum length 5
+      </span>
+    </ion-text>
+
+    <ion-item lines="full">
+      <ion-label position="floating">Password</ion-label>
+      <ion-input type="password" name="password" formControlName="password"></ion-input>
+    </ion-item>
+
+    <ion-text color="danger" *ngIf="controls['password'].touched && controls['password'].errors?.['required']">
+      <span>
+        This field is required
+      </span>
+    </ion-text>
+    <ion-text color="danger" *ngIf="controls['password'].touched && controls['password'].errors?.['minlength']">
+      <span>
+        Minimum length 6
+      </span>
+    </ion-text>
+
+    <ion-item lines="full">
+      <ion-label position="floating">Confirm password</ion-label>
+      <ion-input type="password" name="confirmPassword" formControlName="confirmPassword"></ion-input>
+    </ion-item>
+
+    <ion-text color="danger" *ngIf="controls['confirmPassword'].touched && controls['confirmPassword'].errors?.['required']">
+      <span>
+        This field is required
+      </span>
+    </ion-text>
+    <ion-text color="danger" *ngIf="controls['confirmPassword'].touched && controls['confirmPassword'].errors?.['minlength']">
+      <span>
+        Minimum length 6
+      </span>
+    </ion-text>
+
+    <ion-text color="danger"  *ngIf="passwordMatchError">
+      Password does not match
+    </ion-text>
+
+
+    <ion-text color="danger"  *ngIf="registerPassError">
+      Sorry, an error occure, please try later !
+    </ion-text>
+
+
+    <ion-button color="light" expand="block" shape="round" [disabled]="registerForm.invalid" type="submit" fill="outline">Register</ion-button>
+
+    <br>
+
+    <ion-button color="tertiary" expand="block" shape="round" (click)="goBack()">Cancel</ion-button>
+
+
+  </ion-content>
+</form>

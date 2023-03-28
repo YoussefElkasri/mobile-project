@@ -1,10 +1,12 @@
 export interface User {
-  // id: string;
-  // identifier: string;
-  // password: string;
   uid: string;
+  username: string;
   email: string;
-  displayName: string;
-  photoURL: string;
-  emailVerified: boolean;
+  password: string;
+  emailVerified:boolean;
+  profileLink: string;
+  invitations?:[{
+    topicId:string;
+    topicName:string;
+  }]
 }

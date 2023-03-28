@@ -1,8 +1,13 @@
 import { inject, Injectable } from '@angular/core';
-import { Firestore, collection, collectionData, doc, getDoc, docData, addDoc , deleteDoc, CollectionReference, setDoc } from '@angular/fire/firestore';
-import { BehaviorSubject, map, Observable, of,pipe, switchMap } from 'rxjs';
+import { Firestore, collection, collectionData, doc, docData, addDoc , deleteDoc, CollectionReference, query, where, getDocs , updateDoc, orderBy, getDoc} from '@angular/fire/firestore';
+import { BehaviorSubject, map, Observable, switchMap } from 'rxjs';
 import { Post } from '../models/post';
 import { Topic } from '../models/topic';
+import { User } from '../models/user';
+import { AuthService } from './auth.service';
+import { Notif } from '../models/notification';
+import { Invitation } from '../models/invitation';
+import { Invite } from '../models/invite';
 
 @Injectable({
   providedIn: 'root'
@@ -10,8 +15,8 @@ import { Topic } from '../models/topic';
 export class TopicService {
 
   private firestore= inject(Firestore);
-
-  private topics$:BehaviorSubject<Topic[]> = new BehaviorSubject([{id: '123', name: 'test', posts: []} as Topic]);
+  private authService = inject(AuthService);
+  private topics$:BehaviorSubject<Topic[]> = new BehaviorSubject([{} as Topic]);
 
   constructor() { }
 
@@ -26,12 +31,29 @@ export class TopicService {
 
   getAll():Observable<Topic[]>{
     const collectionRef = collection(this.firestore,`topics`) as CollectionReference<Topic>;
-    return collectionData<Topic>(collectionRef, {idField:'id'});
+    let uid = this.authService.getAuth()?.uid;
+    return collectionData<Topic>(query(collectionRef, where("creator", "==", uid) ), {idField:'id'});
+   // return collectionData<Topic>(collectionRef, {idField:'id'});
+  }
+
+  getTopicsForReadInvited():Observable<Topic[]>{
+    const collectionRef = collection(this.firestore,`topics`) as CollectionReference<Topic>;
+    let email= this.authService.getAuth()?.email;
+    return collectionData<Topic>(query(collectionRef, where("invitesRead", "array-contains", email)));
+    //.where("members", "array-contains", { accountId: "qgZ564nfEaNP3Nt4cW1K3jCeVlY2", approved: true })
+   // return collectionData<Topic>(collectionRef, {idField:'id'});
+  }
+
+  getTopicsForWriteInvited():Observable<Topic[]>{
+    const collectionRef = collection(this.firestore,"topics") as CollectionReference<Topic>;
+    let email= this.authService.getAuth()?.email;
+    return collectionData<Topic>(query(collectionRef, where("invitesWrite", "array-contains", email)));
   }
 
   getAllPosts(id:string):Observable<Post[]>{
     const collectionRef = collection(this.firestore,`topics/${id}/posts`) as CollectionReference<Post>;
-    return collectionData<Post>(collectionRef, {idField:'id'});
+
+    return collectionData<Post>(collectionRef , {idField:'id'});
   }
 
   findOnePost(topicId: string, postId: string): Observable<any>{
@@ -51,13 +73,20 @@ export class TopicService {
     const collectionRef = collection(this.firestore,`topics/${id}/posts`) as CollectionReference<Post>;
 
     return docData(docRef,{idField:'id'}).pipe(
-      switchMap(topic=> collectionData(collectionRef, {idField:'id'}).pipe(
-        map(posts=>({
+      switchMap(topic=> collectionData(query(collectionRef, orderBy('dateTime', 'asc')), {idField:'id'}).pipe(
+        map(posts => ({
           ...topic,
           posts
-        }))
+        })
+        )
       ))
     );
+  }
+
+
+  async getTopic(topicId: string) {
+    const docRef = doc(this.firestore, "topics", topicId);
+    return (await getDoc(docRef)).data() as Topic
   }
 
   /**
@@ -66,7 +95,66 @@ export class TopicService {
    * @param topic {Topic}, the {Topic} to add to the list
    */
   create(topic: Topic): void {
-    const docRef = addDoc(collection(this.firestore, "topics"), topic);
+    topic.creator = this.authService.getAuth()!.uid;
+
+    let invites:string[]=[];
+    let read:string[]=[]
+    let write:string[]=[]
+    topic.invites.forEach(invite=>{
+      if(invite.right == "read"){
+        read.push(invite.email);
+      }
+      else if(invite.right == "write"){
+        write.push(invite.email);
+      }
+    });
+
+    const docRef = addDoc(collection(this.firestore, "topics"),{name:topic.name,creator:topic.creator,invitesRead:read,invitesWrite:write});
+
+     docRef.then(docTopic=>{
+      const docRef = doc(this.firestore, "topics", docTopic.id);
+      updateDoc(docRef , {id:docTopic.id});
+      topic.invites.forEach(invite=>{
+          this.sendInvitation(invite.email,docTopic.id,topic.name);
+      //  }
+      })
+
+     });
+  }
+
+  async updateTopic(topic : Topic){
+    console.log(topic)
+    let topicTmp:Topic={
+      id: '',
+      name: '',
+      creator: '',
+      invites: [],
+      posts: [],
+      invitesRead: [],
+      invitesWrite: []
+    };
+    const docRef = doc(this.firestore, "topics", topic.id);
+     topicTmp = (await getDoc(docRef)).data() as Topic;
+     topicTmp.name=topic.name;
+     topic.invites.forEach(invite=>{
+       if(invite.right == "read"){
+         topicTmp.invitesRead.push(invite.email);
+       }else if(invite.right == "write"){
+         topicTmp.invitesWrite.push(invite.email);
+       }
+     });
+     updateDoc(docRef, {name:topicTmp.name,invitesRead:topicTmp.invitesRead,invitesWrite:topicTmp.invitesWrite})
+
+
+      topic.invites.forEach(invite=>{
+        this.sendInvitation(invite.email, topic.id, topic.name);
+      })
+
+  }
+
+  async renameTopic(topic : Topic){
+    const docRef = doc(this.firestore, "topics", topic.id);
+     updateDoc(docRef, {name:topic.name});
   }
 
   /**
@@ -92,6 +180,27 @@ export class TopicService {
     }
   }
 
+  updatePost(topicId: string, post: Post) {
+    const docRef = doc(this.firestore, `topics/${topicId}/posts`, post.id);
+
+    if(docRef != null) {
+      updateDoc(docRef, {
+        message: post.message
+      });
+    }
+  }
+
+  updateUser(user: User) {
+    const docRef = doc(this.firestore, `users/${user.uid}`);
+
+    if(docRef != null) {
+      updateDoc(docRef, {
+        profileLink: user.profileLink,
+        username: user.username
+      });
+    }
+  }
+
   /**
    * Remove a {Post} from the list of {Post} of the {Topic} that match the given topicId
    *
@@ -105,4 +214,87 @@ export class TopicService {
     }
 
   }
+
+  getAllUsers():Observable<User[]>{
+    const collectionRef = collection(this.firestore,`users`) as CollectionReference<User>;
+    return collectionData<User>(collectionRef, {idField:'id'});
+  }
+
+  async getUserByEmail(email:string){
+    // Create a query to search for documents with a specific field value
+    const collectionRef = collection(this.firestore,`users`) as CollectionReference<User>;
+    const q = query(collectionRef, where("email", "==", email));
+    const querySnapshot = await getDocs(q);
+    return querySnapshot;
+  }
+
+
+  async sendInvitation(email:string,topicId:string,topicName:string){
+    // Get a Firestore reference
+  const db = this.firestore;
+
+// Get a reference to the document that you want to update
+    let docRef= this.getUserByEmail(email);
+    (await this.getUserByEmail(email)).forEach((document) => {
+        const collectionRef = collection(this.firestore,`invitations`) as CollectionReference<Invitation>;
+        const docInvitationRef = addDoc(collectionRef, {userId:document.id,topicId:topicId,accepted:false});
+       let notification!: Notif;
+        docInvitationRef.then(invitation=>{
+          notification={title:"New Invitation",description:"You have received a new invitation to join a discussion group !",readed:false,userId:document.id, topicName:topicName, invitationId:invitation.id};
+          this.sendNotification(notification);
+        })
+
+      });
+  }
+
+  sendNotification(notification:Notif){
+    const docNotificationRef = addDoc(collection(this.firestore, "notifications"), notification);
+    docNotificationRef.then(notif=>{
+      const docRef = doc(this.firestore, "notifications", notif.id);
+      updateDoc(docRef , {id:notif.id});
+    });
+
+  }
+
+   getNotificationForUser(idUserDoc:string){
+    const collectionRef = collection(this.firestore,`notifications`) as CollectionReference<Notif>;
+    return collectionData<Notif>(query(collectionRef, where("userId", "==", idUserDoc)));
+
+    //const q = query(collectionRef, where("userId", "==", idUserDoc));
+    // const querySnapshot =  getDocs(q);
+    // querySnapshot.forEach(document=>{
+    //   console.log(document.data());
+    // })
+  }
+
+  deleteNotification(id:string){
+    const docRef = doc(this.firestore, `notifications/${id}`);
+    if(docRef != null) {
+      deleteDoc(docRef);
+    }
+  }
+
+  acceptInvitation(invitationId:string){
+    const docRef = doc(this.firestore, "invitations", invitationId);
+    updateDoc(docRef , {accepted:true});
+  }
+
+  markReadOnNotification(notificationId:string){
+    const docRef = doc(this.firestore, "notifications", notificationId);
+    if(docRef != null){
+      updateDoc(docRef , {readed:true});
+    }
+
+  }
+
+  getInvitation(topicId:string){
+    const collectionRef = collection(this.firestore,`invitations`) as CollectionReference<Invitation>;
+    return collectionData<Invitation>(query(collectionRef, where("topicId", "==", topicId)));
+  }
+
+  // getInvitation(invitationId:string){
+  //   const docRef = doc(this.firestore, "topics", invitationId);
+  //   return collectionData<Notif>(query(collectionRef, where("object.id", "==", idUserDoc)));
+  // }
+
 }

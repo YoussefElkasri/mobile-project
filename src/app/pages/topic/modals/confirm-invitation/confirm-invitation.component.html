@@ -1,0 +1,15 @@
+<ion-header translucent>
+    <ion-toolbar>
+        <ion-buttons slot="start">
+            <ion-button fill="clear"  (click)="close()">Close</ion-button>
+        </ion-buttons>
+        <ion-title>Groupe invitation</ion-title>
+    </ion-toolbar>
+</ion-header>
+<ion-content fullscreen>
+    <p>You have received an invitation to join this group: {{notification.topicName}}</p>
+    <div>
+        <ion-button expand="block" shape="round" (click)="accept()">Accept</ion-button>
+        <ion-button expand="block" shape="round" (click)="close()">Decline</ion-button>
+    </div>
+</ion-content>
