@@ -11,7 +11,7 @@ import { CommonModule } from '@angular/common';
 import { AuthService } from 'src/app/services/auth.service';
 import { Notif } from 'src/app/models/notification';
 import { ConfirmInvitationComponent } from './modals/confirm-invitation/confirm-invitation.component';
-import { User } from '@capacitor-firebase/authentication/dist/esm/definitions';
+// import { User } from '@capacitor-firebase/authentication/dist/esm/definitions';
 
 @Component({
   selector: 'app-home',
@@ -141,11 +141,15 @@ import { User } from '@capacitor-firebase/authentication/dist/esm/definitions';
   `,
   styles: [
     `
-    ion-header,
-ion-toolbar {
-    --ion-background: linear-gradient(#203887, #0c437b) !important;
-    color: white !important;
-}
+      ion-content {
+        color: white;
+      }
+
+      ion-header,
+      ion-toolbar {
+        --ion-background-color: #0c437b !important;
+        color: white !important;
+      }
       ion-item::part(native) {
         border-color: #0c437b;
         border-width: 0px 0px 2px 0px;
@@ -207,13 +211,13 @@ export class TopicPage implements OnInit {
   topics$!: Observable<Topic[]>;
   topicsInvited$!: Observable<Topic[]>;
   notifications$!: Observable<Notif[]>;
-  text$:BehaviorSubject<string>=new BehaviorSubject('');
-  TopicReadinvite:Topic[]=[];
-  TopicWriteinvite:Topic[]=[];
-  numberNotifications:number=0;
-  profileImg:string="";
-  user!:User;
-  subscribeUser:any;
+  text$: BehaviorSubject<string> = new BehaviorSubject('');
+  TopicReadinvite: Topic[] = [];
+  TopicWriteinvite: Topic[] = [];
+  numberNotifications: number = 0;
+  profileImg: string = '';
+  // user!:User;
+  subscribeUser: any;
   private topicService = inject(TopicService);
   private authService = inject(AuthService);
   private toastController = inject(ToastController);
@@ -273,10 +277,12 @@ export class TopicPage implements OnInit {
         });
       });
     });
-    this.authService.user$.subscribe(user => {
-      if(user.uid){
-        this.profileImg= user.profileLink;
-        this.notifications$= this.topicService.getNotificationForUser(user.uid);
+    this.authService.user$.subscribe((user) => {
+      if (user.uid) {
+        this.profileImg = user.profileLink;
+        this.notifications$ = this.topicService.getNotificationForUser(
+          user.uid
+        );
 
         this.notifications$.subscribe((notifications) => {
           this.numberNotifications = 0;

@@ -20,7 +20,7 @@ import { UserDetailComponent } from './modals/user-detail/user-detail.component'
   standalone: true,
   template: `
   <ng-container *ngIf="topic$ | async as topic$">
-  <ion-menu contentId="main-content">
+  <ion-menu contentId="main-content" >
   <ion-header>
     <ion-toolbar>
       <ion-title>Menu Content</ion-title>
@@ -134,6 +134,20 @@ import { UserDetailComponent } from './modals/user-detail/user-detail.component'
 `,
   styles: [
     `
+      #menu {
+        ion-content {
+          --ion-background-color: #0c437b;
+          ion-item {
+            --ion-background-color: transparent; ;
+          }
+        }
+      }
+
+      ion-header,
+      ion-toolbar {
+        --ion-background-color: #0c437b !important;
+        color: white !important;
+      }
       ion-item::part(native) {
         border-color: #0c437b;
         border-width: 0px 0px 1px 0px;
@@ -182,14 +196,14 @@ export class TopicDetailsPage implements OnInit {
 
   topicId: string | null = null;
   topic$: Observable<Topic | null> = EMPTY;
-  topic!:Topic;
+  topic!: Topic;
   private topicService = inject(TopicService);
   private modalCtrl = inject(ModalController);
   private route = inject(ActivatedRoute);
   private authService = inject(AuthService);
   private toastController = inject(ToastController);
 
-  userInTopic:User[]=[];
+  userInTopic: User[] = [];
   user: User | null = null;
   message: string = '';
 
@@ -204,9 +218,9 @@ export class TopicDetailsPage implements OnInit {
     this.user = this.authService.getUser();
 
     let alreadyInvit: string[] = new Array();
-    this.topic$.subscribe(data=>{
-      this.topic=data as Topic;
-    })
+    this.topic$.subscribe((data) => {
+      this.topic = data as Topic;
+    });
     this.topicService.findOne(this.topicId as string).subscribe((data) => {
       data.invitesWrite.forEach((element: string) => {
         alreadyInvit.push(element);
@@ -216,28 +230,29 @@ export class TopicDetailsPage implements OnInit {
         alreadyInvit.push(element);
       });
 
-      alreadyInvit.forEach(async element=>{
-        (await this.topicService.getUserByEmail(element)).forEach(document => {
-          if(this.userInTopic.length > 0){
-            this.userInTopic.forEach(userTopic=>{
-              if(userTopic.email != document.data().email){
-                this.userInTopic.push(document.data());
-              }
-            });
-          }else{
-            this.userInTopic.push(document.data());
+      alreadyInvit.forEach(async (element) => {
+        (await this.topicService.getUserByEmail(element)).forEach(
+          (document) => {
+            if (this.userInTopic.length > 0) {
+              this.userInTopic.forEach((userTopic) => {
+                if (userTopic.email != document.data().email) {
+                  this.userInTopic.push(document.data());
+                }
+              });
+            } else {
+              this.userInTopic.push(document.data());
+            }
           }
-
-
-
-
-        })
+        );
       });
 
       this.topicService.getAllUsers().subscribe((data_user) => {
         this.users = data_user;
         this.users.forEach((user) => {
-          if (user.email != this.authService.user.email && !alreadyInvit.includes(user.email)) {
+          if (
+            user.email != this.authService.user.email &&
+            !alreadyInvit.includes(user.email)
+          ) {
             this.userItems.push({ text: user.username, value: user.email });
           }
         });
@@ -273,21 +288,21 @@ export class TopicDetailsPage implements OnInit {
       this._addPost(data);
     }
   }
-  async selectUser(user:User){
+  async selectUser(user: User) {
     const modal = await this.modalCtrl.create({
       component: UserDetailComponent,
       componentProps: {
         user: user,
-        topic : this.topic,
+        topic: this.topic,
       },
     });
     modal.present();
 
     const { data, role } = await modal.onWillDismiss();
     if (role === 'confirmed') {
-      let topic:Topic = this.topic;
+      let topic: Topic = this.topic;
 
-      this.updateRightUser(data,this.topic,user);
+      this.updateRightUser(data, this.topic, user);
       // this.jointGroup(notification.id!, notification.invitationId);
     }
   }
@@ -345,15 +360,19 @@ export class TopicDetailsPage implements OnInit {
     }
   }
 
-  private async updateRightUser(data: any,topic:Topic,user:User): Promise<void> {
+  private async updateRightUser(
+    data: any,
+    topic: Topic,
+    user: User
+  ): Promise<void> {
     try {
-      this.topicService.updateUserRight(data,topic);
+      this.topicService.updateUserRight(data, topic);
 
       const toast = await this.toastController.create({
         message: `right of the ${user.username} successfully updated`,
         duration: 1500,
         position: 'bottom',
-        color: 'success'
+        color: 'success',
       });
 
       await toast.present();
@@ -362,7 +381,7 @@ export class TopicDetailsPage implements OnInit {
         message: `Failed updating right of ${user.username}`,
         duration: 1500,
         position: 'bottom',
-        color: 'danger'
+        color: 'danger',
       });
       await toast.present();
     }
@@ -461,18 +480,15 @@ export class TopicDetailsPage implements OnInit {
   }
 
   updateInvite() {
-
-    this.topicService.getTopic(this.topicId!).then(
-      (topic) => {
-        if (topic) {
-          this.selectedUsers.forEach((user) => {
-            (topic as Topic).invites = new Array();
-            topic.invites.push(user as unknown as Invite)
-          })
-          this.topicService.updateTopic(topic);
-          this.isOpenModalFirend=false;
-        }
+    this.topicService.getTopic(this.topicId!).then((topic) => {
+      if (topic) {
+        this.selectedUsers.forEach((user) => {
+          (topic as Topic).invites = new Array();
+          topic.invites.push(user as unknown as Invite);
+        });
+        this.topicService.updateTopic(topic);
+        this.isOpenModalFirend = false;
       }
-    )
+    });
   }
 }

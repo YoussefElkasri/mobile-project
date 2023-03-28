@@ -1,6 +1,11 @@
 import { NgIf } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import { IonicModule, ModalController } from '@ionic/angular';
 import { Post } from 'src/app/models/post';
 
@@ -9,54 +14,77 @@ import { Post } from 'src/app/models/post';
   standalone: true,
   imports: [ReactiveFormsModule, IonicModule, NgIf],
   template: `
-  <form [formGroup]="createPostForm" (ngSubmit)="createPost()" novalidate>
-  <ion-header translucent>
-    <ion-toolbar>
-      <ion-buttons slot="start">
-        <ion-button fill="clear" (click)="dismissModal(null, 'canceled')">Close</ion-button>
-      </ion-buttons>
-      <ion-title>Modal Content</ion-title>
-      <ion-buttons slot="end">
-        <ion-button fill="clear" [disabled]="createPostForm.invalid" type="submit">
-          <ion-icon name="checkmark-outline"></ion-icon>
-        </ion-button>
-      </ion-buttons>
-    </ion-toolbar>
-  </ion-header>
+    <form [formGroup]="createPostForm" (ngSubmit)="createPost()" novalidate>
+      <ion-header translucent>
+        <ion-toolbar>
+          <ion-buttons slot="start">
+            <ion-button fill="clear" (click)="dismissModal(null, 'canceled')"
+              >Close</ion-button
+            >
+          </ion-buttons>
+          <ion-title>Modal Content</ion-title>
+          <ion-buttons slot="end">
+            <ion-button
+              fill="clear"
+              [disabled]="createPostForm.invalid"
+              type="submit"
+            >
+              <ion-icon name="checkmark-outline"></ion-icon>
+            </ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
 
-  <ion-content fullscreen>
-    <ion-item lines="full">
-      <ion-label position="floating">Name</ion-label>
-      <ion-input type="text" name="name" formControlName="name"></ion-input>
-    </ion-item>
-    <ion-text color="danger" *ngIf="controls['name'].touched && controls['name'].errors?.['required']">
-      <span>
-        This field is required
-      </span>
-    </ion-text>
-    <ion-text color="danger" *ngIf="controls['name'].touched && controls['name'].errors?.['minlength']">
-      <span>
-        Minimum length 2
-      </span>
-    </ion-text>
+      <ion-content fullscreen>
+        <ion-item lines="full">
+          <ion-label position="floating">Name</ion-label>
+          <ion-input type="text" name="name" formControlName="name"></ion-input>
+        </ion-item>
+        <ion-text
+          color="danger"
+          *ngIf="controls['name'].touched && controls['name'].errors?.['required']"
+        >
+          <span> This field is required </span>
+        </ion-text>
+        <ion-text
+          color="danger"
+          *ngIf="controls['name'].touched && controls['name'].errors?.['minlength']"
+        >
+          <span> Minimum length 2 </span>
+        </ion-text>
 
-    <ion-item lines="full">
-      <ion-label position="floating">Description</ion-label>
-      <ion-textarea type="text" name="description" formControlName="description"></ion-textarea>
-    </ion-item>
-  </ion-content>
-</form>
+        <ion-item lines="full">
+          <ion-label position="floating">Description</ion-label>
+          <ion-textarea
+            type="text"
+            name="description"
+            formControlName="description"
+          ></ion-textarea>
+        </ion-item>
+      </ion-content>
+    </form>
   `,
-  styles: [],
+  styles: [
+    `
+      ion-content {
+        color: white;
+      }
+
+      ion-header,
+      ion-toolbar {
+        --ion-background-color: #0c437b !important;
+        color: white !important;
+      }
+    `,
+  ],
 })
 export class CreatePostComponent implements OnInit {
-
   createPostForm!: FormGroup;
 
-  constructor(private modalController: ModalController,
-    private formBuilder: FormBuilder) {
-
-  }
+  constructor(
+    private modalController: ModalController,
+    private formBuilder: FormBuilder
+  ) {}
 
   /**
    * Getter for the {FormGroup} controls
@@ -75,7 +103,7 @@ export class CreatePostComponent implements OnInit {
   ngOnInit() {
     this.createPostForm = this.formBuilder.group({
       name: ['', [Validators.required, Validators.minLength(2)]],
-      description: ['']
+      description: [''],
     });
   }
 

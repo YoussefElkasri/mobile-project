@@ -30,9 +30,7 @@ import { AuthService } from 'src/app/services/auth.service';
       <ion-header translucent>
         <ion-toolbar>
           <ion-buttons slot="start">
-            <ion-button
-              fill="clear"
-              (click)="dismissModal(null, 'canceled')"
+            <ion-button fill="clear" (click)="dismissModal(null, 'canceled')"
               >Close</ion-button
             >
           </ion-buttons>
@@ -100,6 +98,18 @@ import { AuthService } from 'src/app/services/auth.service';
         box-shadow: 0px 0px 10px 0px #0c437b;
         border-radius: 20px;
       }
+
+      ion-content {
+        ion-content {
+          color: white;
+        }
+
+        ion-header,
+        ion-toolbar {
+          --ion-background-color: #0c437b !important;
+          color: white !important;
+        }
+      }
     `,
   ],
 })
@@ -135,12 +145,11 @@ export class CreateTopicComponent implements OnInit {
    * - name: a {string}, which should be not null and has a min length of 2.
    */
   ngOnInit() {
-
-    if(this.topic){
-      this.canUpdateUsers=this.creator;
-      let invites:string[]=[];
-      this.topic.invitesRead.forEach(item=>{
-        if(item){
+    if (this.topic) {
+      this.canUpdateUsers = this.creator;
+      let invites: string[] = [];
+      this.topic.invitesRead.forEach((item) => {
+        if (item) {
           invites.push(item);
         }
       });
@@ -164,8 +173,8 @@ export class CreateTopicComponent implements OnInit {
           }
         });
       });
-    }else{
-      this.canUpdateUsers=true;
+    } else {
+      this.canUpdateUsers = true;
       this.createTopicForm = this.formBuilder.group({
         name: ['', [Validators.required, Validators.minLength(2)]],
         invites: [[], [Validators.required]],
