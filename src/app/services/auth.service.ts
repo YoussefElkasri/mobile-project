@@ -174,19 +174,19 @@ export class AuthService {
     await signInWithCredential(getAuth(), credential);
     //USER.value = getAuth().currentUser;
     if(getAuth().currentUser){
-      await this.addGithubUser(getAuth().currentUser);
+      await this.addGithubUser(getAuth().currentUser,result.additionalUserInfo?.profile);
       this.SetUserData(getAuth().currentUser);
     }
     this.router.navigate(['topic']);
     return getAuth().currentUser;
   }
-  async addGithubUser(user: any) {
+  async addGithubUser(user: any,profile:any) {
     const docRefWithSet = setDoc(doc(
         this.firestore,
         "users",
         user.uid
       ),
-      {username : user.displayName, email: user.email, profileLink: user.photoURL,emailVerified: user.emailVerified}
+      {username : profile.login, email: user.email, profileLink: user.photoURL,emailVerified: user.emailVerified}
       )
   }
 }

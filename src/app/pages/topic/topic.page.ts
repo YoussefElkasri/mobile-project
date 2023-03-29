@@ -123,9 +123,9 @@ import { User } from '@capacitor-firebase/authentication/dist/esm/definitions';
           </ion-item>
 
           <ion-item-options side="end">
-            <ion-item-option (click)="delete(topic)" color="danger">
+            <!-- <ion-item-option (click)="delete(topic)" color="danger">
               <ion-icon slot="icon-only" name="trash"></ion-icon>
-            </ion-item-option>
+            </ion-item-option> -->
             <ion-item-option (click)="update(topic)" color="primary">
               <ion-icon slot="icon-only" name="create-outline"></ion-icon>
             </ion-item-option>
@@ -209,6 +209,7 @@ export class TopicPage implements OnInit {
   // @ViewChild('modalNotif', { static: true }) modalNotif!: IonModal;
 
   topics$!: Observable<Topic[]>;
+  topics: Topic[]=[];
   topicsInvited$!: Observable<Topic[]>;
   notifications$!: Observable<Notif[]>;
   text$: BehaviorSubject<string> = new BehaviorSubject('');
@@ -240,18 +241,31 @@ export class TopicPage implements OnInit {
           )
         )
       );
+      // this.topicService
+      // .getAll().subscribe(data=>{
+      //   console.log(data);
+      //   // this.topics.forEach(topic=>{
+      //   //   if()
+      //   // })
+      // });
     //this.topicsInvited$ = this.topicService.getTopicsForInvited();
     this.topicService.getTopicsForReadInvited().subscribe((data) => {
       this.TopicReadinvite = [];
       data.forEach((item) => {
         this.topicService.getInvitation(item.id).subscribe((res) => {
+          this.TopicReadinvite=[];
           res.forEach((inv) => {
             if (
               inv.userId == this.authService.getAuth()?.uid &&
               inv.accepted == true
             ) {
-              let i = this.TopicReadinvite.indexOf(item);
-              if (i == -1) {
+              let exist=false;
+              this.TopicReadinvite.forEach(data=>{
+                if(data.id == item.id){
+                  exist=true;
+                }
+              });
+              if (exist == false) {
                 this.TopicReadinvite.push(item);
               }
             }
@@ -268,8 +282,13 @@ export class TopicPage implements OnInit {
               inv.userId == this.authService.getAuth()?.uid &&
               inv.accepted == true
             ) {
-              let i = this.TopicWriteinvite.indexOf(item);
-              if (i == -1) {
+              let exist=false;
+              this.TopicWriteinvite.forEach(data=>{
+                if(data.id == item.id){
+                  exist=true;
+                }
+              });
+              if (exist == false) {
                 this.TopicWriteinvite.push(item);
               }
             }

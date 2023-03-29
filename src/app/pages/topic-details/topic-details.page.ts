@@ -22,7 +22,7 @@ import { UserDetailComponent } from './modals/user-detail/user-detail.component'
   <ng-container *ngIf="topic$ | async as topic$">
   <ion-menu contentId="main-content" >
   <ion-header>
-    <ion-toolbar>
+    <ion-toolbar style="background:linear-gradient(#203887, #0c437b);">
       <ion-title>Utilisateurs</ion-title>
     </ion-toolbar>
   </ion-header>
@@ -34,7 +34,7 @@ import { UserDetailComponent } from './modals/user-detail/user-detail.component'
 </ion-menu>
     <ion-header>
     <!-- style="background-color:linear-gradient(#203887, #0c437b);" -->
-      <ion-toolbar >
+      <ion-toolbar style="background:linear-gradient(#203887, #0c437b);">
         <ion-buttons slot="start">
           <ion-button fill="clear" [routerLink]="['/']">
             <ion-icon name="arrow-back-outline"></ion-icon>
@@ -258,13 +258,32 @@ export class TopicDetailsPage implements OnInit {
       });
 
       this.topicService.getAllUsers().subscribe((data_user) => {
+        this.userItems=[];
         this.users = data_user;
         this.users.forEach((user) => {
           if (
             user.email != this.authService.user.email &&
             !alreadyInvit.includes(user.email)
           ) {
-            this.userItems.push({ text: user.username, value: user.email });
+            this.topic$.subscribe(async data=>{
+              let topic_=data as Topic;
+              (await this.topicService.getUserByEmail(user.email)).forEach((document) => {
+                if(topic_.creator != document.id ){
+                  let exist=false;
+                  this.userItems.forEach(data=>{
+                    if(data.value == user.email){
+                      exist = true;
+                    }
+                  });
+                  if(exist==false){
+                    this.userItems.push({ text: user.username, value: user.email });
+                  }
+
+                }
+              })
+
+            })
+
           }
         });
       });
